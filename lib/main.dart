@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'views/demo/index.dart';
+import 'views/home/index.dart';
 import 'tools/event_bus.dart';
 
 class MyApp extends StatefulWidget {
@@ -25,7 +25,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return new MaterialApp(
       title: '天歌',
-      home: new Demo(),
+      home: new Home(),
       theme: ThemeData(
         primarySwatch: themeColor
       ),

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:english_words/english_words.dart';
 import '../../tools/event_bus.dart';
 import 'dart:math' as math;
+import 'favorite.dart';
+import 'pop_menu.dart';
+import '../demo/index.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -14,16 +17,41 @@ class _HomeState extends State<Home> {
   final _suggestions = <WordPair>[];
   final textStyle = const TextStyle(fontSize: 18.0);
   final favorites = new Set<WordPair>();
-  _pushSaved (BuildContext context) {
+
+  // 跳转到favorite列表
+  _pushSaved () {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) {
-          return Scaffold(appBar: AppBar(title: Text('favorite list')), body: ListView(children: ListTile.divideTiles(tiles: favorites.map((item) {
-            return ListTile(title: Text(item.asPascalCase, style: textStyle,));
-          }), context: context).toList(),));
+          return Favorite(favorites, textStyle);
         }
       )
     );
+  }
+
+  _pushDemo () {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) {
+          return Demo();
+        }
+      )
+    );
+  }
+
+  // 点击右上角按钮后的回调
+  onSelected(v) {
+    switch (v) {
+      case PopMenuValues.demo:
+        _pushDemo();
+        break;
+      case PopMenuValues.favorite:
+        _pushSaved();
+        break;
+      case PopMenuValues.list:
+        // _pushDemo();
+        break;
+    }
   }
 
   @override
@@ -33,7 +61,7 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: Text('首页'),
         actions: <Widget>[
-          IconButton(icon: Icon(Icons.list), onPressed: () =>_pushSaved(context),)
+          PopMenu(onSelected: onSelected),
         ],
       ),
       body: ListView.builder(
