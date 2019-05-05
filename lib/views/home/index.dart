@@ -6,6 +6,7 @@ import 'favorite.dart';
 import 'pop_menu.dart';
 import 'custom_scroll_view.dart';
 import '../demo/index.dart';
+import '../demo/message.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -64,23 +65,29 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return new Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: Text('首页'),
         actions: <Widget>[
           PopMenu(onSelected: onSelected),
         ],
       ),
-      body: ListView.builder(
-        itemBuilder: (context, i) {
-          if (i.isOdd) return Divider(color: theme.primaryColor);
-          final index = i ~/2;
-          if (index >= _suggestions.length) {
-            
-            _suggestions.addAll(generateWordPairs().take(index - _suggestions.length + 1));
-          }
-          return ListItem(item: _suggestions[index], textStyle: textStyle, favorites: favorites);
-        },
+      body: Stack(
+        fit: StackFit.expand,
+        children: <Widget>[
+          ListView.builder(
+            itemBuilder: (context, i) {
+              if (i.isOdd) return Divider(color: theme.primaryColor);
+              final index = i ~/2;
+              if (index >= _suggestions.length) {
+                
+                _suggestions.addAll(generateWordPairs().take(index - _suggestions.length + 1));
+              }
+              return ListItem(item: _suggestions[index], textStyle: textStyle, favorites: favorites);
+            },
+          ),
+          MessageDemo()
+        ],
       ),
       floatingActionButton: FloatingActionButton(child: Icon(Icons.color_lens), onPressed: () {
         bus.emit('changeTheme', Colors.primaries[math.Random().nextInt(Colors.primaries.length)]);
