@@ -5,7 +5,7 @@ class InkWellButtonDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: InkWell(
-        splashColor: Colors.blue,
+        splashColor: Colors.blue[300],
         onTap: () {
           print('666');
         },

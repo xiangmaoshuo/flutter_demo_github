@@ -66,8 +66,22 @@ class _ScaffedDemoState extends State<ScaffedDemo> with SingleTickerProviderStat
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.colorize),
-        onPressed: (){},
+        child: Icon(Icons.notifications),
+        onPressed: (){
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: Text('温馨提醒'),
+                content: Text('所有TabView都是自己在管理state，所以每次切换都会导致状态的改变，如果不想这样，可以将state提升到根widget上管理'),
+                actions: <Widget>[
+                  Text('1'),
+                  Text('2')
+                ],
+              );
+            }
+          );
+        },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );

@@ -4,6 +4,7 @@ import '../../tools/event_bus.dart';
 import 'dart:math' as math;
 import 'favorite.dart';
 import 'pop_menu.dart';
+import 'custom_scroll_view.dart';
 import '../demo/index.dart';
 
 class Home extends StatefulWidget {
@@ -39,6 +40,12 @@ class _HomeState extends State<Home> {
     );
   }
 
+  _pushCustomScrollView () {
+    Navigator.push(context, MaterialPageRoute(
+      builder: (context) => CustomScrollViewDemo()
+    ));
+  }
+
   // 点击右上角按钮后的回调
   onSelected(v) {
     switch (v) {
@@ -49,7 +56,7 @@ class _HomeState extends State<Home> {
         _pushSaved();
         break;
       case PopMenuValues.list:
-        // _pushDemo();
+        _pushCustomScrollView();
         break;
     }
   }
