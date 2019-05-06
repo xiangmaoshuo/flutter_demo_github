@@ -27,7 +27,8 @@ class _MyAppState extends State<MyApp> {
       title: '天歌',
       home: new Demo(),
       theme: ThemeData(
-        primarySwatch: themeColor
+        primarySwatch: themeColor,
+        bottomAppBarTheme: BottomAppBarTheme(color: themeColor)
       ),
     );
   }

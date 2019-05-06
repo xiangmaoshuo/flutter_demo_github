@@ -17,11 +17,6 @@ class PopMenu extends StatelessWidget {
       itemBuilder: (context) {
         return <PopupMenuEntry<PopMenuValues>>[
           const PopupMenuItem(
-            value: PopMenuValues.demo,
-            child: Text('demo')
-          ),
-          PopupMenuDivider(height: 0,),
-          const PopupMenuItem(
             value: PopMenuValues.favorite,
             child: Text('favorite'),
           ),
