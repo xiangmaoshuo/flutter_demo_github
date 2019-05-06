@@ -18,6 +18,9 @@ class _MessageDemoState extends State<MessageDemo> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
+        // 如果可以pop，则不提示
+        if (Navigator.canPop(context)) return true;
+
         final now = DateTime.now();
         if (_lastTime == null || now.difference(_lastTime) > Duration(seconds: 1)) {
           _lastTime = now;
@@ -34,7 +37,7 @@ class _MessageDemoState extends State<MessageDemo> {
         return true;
       },
       child: Positioned(
-        bottom: 80.0,
+        bottom: 40.0,
         left: 0,
         right: 0,
         child: showMsg ? Row(
@@ -51,7 +54,7 @@ class _MessageDemoState extends State<MessageDemo> {
                   fontSize: 12.0
                 ),),
               ),
-            )
+            ),
           ],
         ) : SizedBox(),
       ),

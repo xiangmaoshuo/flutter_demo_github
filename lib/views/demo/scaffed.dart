@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'message.dart';
 
 class ScaffedDemo extends StatefulWidget {
   ScaffedDemo({Key key, this.drawer, this.children}): super();
@@ -35,9 +36,15 @@ class _ScaffedDemoState extends State<ScaffedDemo> with SingleTickerProviderStat
           tabs: list.map((e) => Tab(text: e,)).toList(),
       )),
       drawer: widget.drawer,
-      body: TabBarView(
-        controller: _tabController,
-        children: widget.children,
+      body: Stack(
+        fit: StackFit.expand,
+        children: <Widget>[
+          TabBarView(
+            controller: _tabController,
+            children: widget.children,
+          ),
+          MessageDemo(),
+        ],
       ),
       // bottomNavigationBar: BottomNavigationBar( // 底部导航
       //   items: <BottomNavigationBarItem>[

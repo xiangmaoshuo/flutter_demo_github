@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:english_words/english_words.dart';
-import '../../tools/event_bus.dart';
+import '../../../tools/event_bus.dart';
 import 'dart:math' as math;
 import 'favorite.dart';
 import 'pop_menu.dart';
-import 'custom_scroll_view.dart';
-import '../demo/index.dart';
-import '../demo/message.dart';
+import '../index.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -41,11 +39,6 @@ class _HomeState extends State<Home> {
     );
   }
 
-  _pushCustomScrollView () {
-    Navigator.push(context, MaterialPageRoute(
-      builder: (context) => CustomScrollViewDemo()
-    ));
-  }
 
   // 点击右上角按钮后的回调
   onSelected(v) {
@@ -55,9 +48,6 @@ class _HomeState extends State<Home> {
         break;
       case PopMenuValues.favorite:
         _pushSaved();
-        break;
-      case PopMenuValues.list:
-        _pushCustomScrollView();
         break;
     }
   }
@@ -83,10 +73,9 @@ class _HomeState extends State<Home> {
                 
                 _suggestions.addAll(generateWordPairs().take(index - _suggestions.length + 1));
               }
-              return ListItem(item: _suggestions[index], textStyle: textStyle, favorites: favorites);
+              return _ListItem(item: _suggestions[index], textStyle: textStyle, favorites: favorites);
             },
-          ),
-          MessageDemo()
+          )
         ],
       ),
       floatingActionButton: FloatingActionButton(child: Icon(Icons.color_lens), onPressed: () {
@@ -96,18 +85,18 @@ class _HomeState extends State<Home> {
   }
 }
 
-class ListItem extends StatefulWidget {
+class _ListItem extends StatefulWidget {
   final item;
   final textStyle;
   final favorites;
-  ListItem({Key key, this.item, this.textStyle, this.favorites}): super(key: key);
+  _ListItem({Key key, this.item, this.textStyle, this.favorites}): super(key: key);
   @override
-  State<ListItem> createState() {
+  State<_ListItem> createState() {
     return new _ListItemState();
   }
 }
 
-class _ListItemState extends State<ListItem> {
+class _ListItemState extends State<_ListItem> {
   @override
   Widget build(BuildContext context) {
     final item = widget.item;
