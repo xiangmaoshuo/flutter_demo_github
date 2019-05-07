@@ -8,20 +8,31 @@ import 'async_list.dart';
 import 'route.dart';
 import 'staggered_grid.dart';
 import 'scaffed.dart';
+import 'scaffed_with_bottom_bar.dart';
+import 'custom_scroll_view.dart';
 
 class Demo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ScaffedDemo(
-      children: <Widget>[
-        ContainerDemo(),
-        CachedImageDemo(),
-        InkWellButtonDemo(),
-        AsyncListDemo(),
-        RouteDemo(),
-        StaggeredGridDemo()
+    return ScaffedWithBottomBarDemo(
+      items: [
+        const BottomBarItemType(icon: Icons.home, text: '首页'),
+        const BottomBarItemType(icon: Icons.camera, text: '朋友圈'),
       ],
-      drawer: DrawerDemo(),
+      views: <Widget>[
+        ScaffedDemo(
+          children: <Widget>[
+            ContainerDemo(),
+            CachedImageDemo(),
+            InkWellButtonDemo(),
+            AsyncListDemo(),
+            RouteDemo(),
+            StaggeredGridDemo()
+          ],
+          drawer: DrawerDemo(),
+        ),
+        CustomScrollViewDemo(),
+      ],
     );
   }
 }

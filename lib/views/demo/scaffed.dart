@@ -46,32 +46,6 @@ class _ScaffedDemoState extends State<ScaffedDemo> with SingleTickerProviderStat
           MessageDemo(),
         ],
       ),
-      // bottomNavigationBar: BottomNavigationBar( // 底部导航
-      //   items: <BottomNavigationBarItem>[
-      //     BottomNavigationBarItem(icon: Icon(Icons.home), title: Text('Home')),
-      //     BottomNavigationBarItem(icon: Icon(Icons.business), title: Text('Business')),
-      //     BottomNavigationBarItem(icon: Icon(Icons.school), title: Text('School')),
-      //   ],
-      //   currentIndex: _selectedIndex,
-      //   fixedColor: Colors.blue,
-      //   onTap: (int index) {
-      //     setState(() {
-      //      _selectedIndex = index; 
-      //     });
-      //   },
-      // ),
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.pink,
-        shape: CircularNotchedRectangle(),
-        child: Row(
-          children: <Widget>[
-            IconButton(icon: Icon(Icons.home), onPressed: () {}, color: Colors.white,),
-            SizedBox(),
-            IconButton(icon: Icon(Icons.home), onPressed: () {}, color: Colors.white,),
-          ],
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-        ),
-      ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.notifications),
         onPressed: (){

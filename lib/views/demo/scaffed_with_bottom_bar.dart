@@ -10,7 +10,7 @@ enum BottomBarType {
 class BottomBarItemType {
   final String text;
   final IconData icon;
-  BottomBarItemType({
+  const BottomBarItemType({
     @required this.icon,
     this.text = ''
   });
@@ -28,7 +28,14 @@ class ScaffedWithBottomBarDemo extends StatefulWidget {
     this.type = BottomBarType.app,
     this.currentIndex = 0,
     Key key
-  }): super(key: key);
+  }): assert(
+      views != null
+      && items != null
+      && views.isNotEmpty
+      && items.isNotEmpty
+      && views.length == items.length
+    ),
+    super(key: key);
 
   @override
   State<ScaffedWithBottomBarDemo> createState() {
@@ -38,8 +45,11 @@ class ScaffedWithBottomBarDemo extends StatefulWidget {
 
 class _ScaffedWithBottomBarDemoState extends State<ScaffedWithBottomBarDemo> {
   Widget currentView;
+
   changeHandler(i) {
-    currentView = widget.views[i];
+    setState(() {
+     currentView = widget.views[i]; 
+    });
   }
 
   @override
@@ -50,19 +60,13 @@ class _ScaffedWithBottomBarDemoState extends State<ScaffedWithBottomBarDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: Column(
-        children: <Widget>[
-          Expanded(
-            child: currentView,
-          ),
-          _ShareDataWidget(
-            child: _BottomNavigationBarDemo(changeHandler: changeHandler),
-            items: widget.items,
-            type: widget.type,
-            currentIndex: widget.currentIndex,
-          )
-        ],
+    return Scaffold(
+      body: currentView,
+      bottomNavigationBar: _ShareDataWidget(
+        child: _BottomNavigationBarDemo(changeHandler: changeHandler),
+        items: widget.items,
+        type: widget.type,
+        currentIndex: widget.currentIndex,
       ),
     );
   }
@@ -85,12 +89,6 @@ class _BottomNavigationBarDemo extends StatefulWidget {
 class _BottomNavigationBarDemoState extends State<_BottomNavigationBarDemo> {
   int _currentIndex;
   _ShareDataWidget _store;
-  @override
-  void initState() {
-    super.initState();
-    _store = _ShareDataWidget.of(context);
-    _currentIndex = _store.currentIndex;
-  }
   
   _changeCurrentIndex(int i) {
     setState(() {
@@ -101,37 +99,41 @@ class _BottomNavigationBarDemoState extends State<_BottomNavigationBarDemo> {
   }
 
   @override
+  void didChangeDependencies() {
+    _store = _ShareDataWidget.of(context);
+    _currentIndex = _store.currentIndex;
+    super.didChangeDependencies();
+  }
+
+  @override
   Widget build(BuildContext context) {
-
     final Color _color = Theme.of(context).primaryTextTheme.body2.color;
-
-    return Scaffold(
-      bottomNavigationBar: Builder(
-        builder: (context) {
-          switch (_store.type) {
-            case BottomBarType.app:
-              int index = 0;
-              return BottomAppBar(
-                child: Row(
-                  children: _store.items.map((item) {
-                    final _i = index;
-                    final __color = _currentIndex == _i ? _color : _color.withAlpha(0xB2);
-                    index ++;
-                    return IconButton(icon: Icon(item.icon, color: __color), onPressed: () => _changeCurrentIndex(_i),);
-                  }).toList(),
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                ),
-              );
-            default:
-              return BottomNavigationBar( // 底部导航
-              items: _store.items.map((item) => BottomNavigationBarItem(icon: Icon(item.icon), title: Text(item.text))).toList(),
-              type: BottomNavigationBarType.fixed, // fixed, shifting; fixed 一直显示icon和text，shifting只在active的item上显示text
-              currentIndex: _currentIndex,
-              onTap: _changeCurrentIndex,
+  
+    return Builder(
+      builder: (context) {
+        switch (_store.type) {
+          case BottomBarType.app:
+            int index = 0;
+            return BottomAppBar(
+              child: Row(
+                children: _store.items.map((item) {
+                  final _i = index;
+                  final __color = _currentIndex == _i ? _color : _color.withAlpha(0xB2);
+                  index ++;
+                  return IconButton(icon: Icon(item.icon, color: __color), onPressed: () => _changeCurrentIndex(_i),);
+                }).toList(),
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+              ),
             );
-          } 
-        },
-      ),
+          default:
+            return BottomNavigationBar( // 底部导航
+            items: _store.items.map((item) => BottomNavigationBarItem(icon: Icon(item.icon), title: Text(item.text))).toList(),
+            type: BottomNavigationBarType.fixed, // fixed, shifting; fixed 一直显示icon和text，shifting只在active的item上显示text
+            currentIndex: _currentIndex,
+            onTap: _changeCurrentIndex,
+          );
+        } 
+      },
     );
   }
 }
