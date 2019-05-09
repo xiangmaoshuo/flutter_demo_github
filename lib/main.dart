@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show SystemChrome, DeviceOrientation;
+
 import 'views/demo/index.dart';
 import 'tools/event_bus.dart';
 
@@ -37,4 +39,6 @@ class _MyAppState extends State<MyApp> {
 
 
 // 开始渲染app
-void main() => runApp(new MyApp());
+void main() => SystemChrome.setPreferredOrientations(
+  [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]
+).then((v) => runApp(new MyApp()));
