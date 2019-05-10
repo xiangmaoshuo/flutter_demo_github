@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'custom_scroll_view.dart';
 import 'home/index.dart';
+import 'listener/pointer.dart';
+
 class DrawerDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -61,6 +63,7 @@ class __DrawerListState extends State<_DrawerList> {
   final List<_KeyValue> list = [
     _KeyValue(title: 'Home', subTitle: '一个拥有交互的列表demo，外加结合eventBus实现修改主题颜色demo', value: () => Home()),
     _KeyValue(title: 'CustomScrollViewDemo', subTitle: '类似朋友圈的列表demo', value: () => CustomScrollViewDemo()),
+    _KeyValue(title: 'PointerDemo', subTitle: '监听点击事件的demo', value: () => PointerDemo()),
   ];
 
   @override
