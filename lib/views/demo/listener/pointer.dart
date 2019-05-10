@@ -52,6 +52,32 @@ class PointerDemo extends StatelessWidget {
             )
           ),
           Divider(),
+          Listener(
+            child: AbsorbPointer(
+            // child: Container(  // => 1
+              child: Container(
+                height: 150,
+                child: Listener(
+                  child: IgnorePointer( // 这里不使用 IgnorePointer 也是可以的，因为本身AbsorbPointer就会忽略内部的point事件
+                      child: Center(child: Text("内部Listener永远不会触发")),
+                  ),
+                  onPointerDown: (e) {
+                    print(
+                      '该行永远不会打印出来'
+                    );
+                  },
+                ),
+              ),
+            ),
+            // behavior: HitTestBehavior.opaque, // => 2
+            onPointerDown: (event) => print(
+              'IgnorePointer 和 AbsorbPointer 都会忽略PointEvent，区别在于前者本身也会忽略，后者本身不会忽略\n'
+              'AbsorbPointer 本身不但不会忽略，还自带HitTestBehavior.opaque效果\n'
+              'IgnorePointer 不仅会忽略事件，而且当behavior 为默认值时，IgnorePointer 也不会冒泡，感觉就像这个widget是透明的一样'
+              '可以切换上面 =>1, =>2 看效果'
+            )
+          ),
+          Divider(),
         ],
       ),
     );
