@@ -1,15 +1,15 @@
-buildscript {
+buildscript { //这里是gradle脚本执行所需依赖，分别是对应的maven库和插件
     repositories {
-        google()
-        jcenter()
+        google() //从Android Studio3.0后新增了google()配置，可以引用google上的开源项目
+        jcenter() //是一个类似于github的代码托管仓库，声明了jcenter()配置，可以轻松引用 jcenter上的开源项目
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath 'com.android.tools.build:gradle:3.2.1' //此处是android的插件gradle，gradle是一个强大的项目构建工具
     }
 }
 
-allprojects {
+allprojects { //这里是项目本身需要的依赖，比如项目所需的maven库
     repositories {
         google()
         jcenter()
@@ -23,6 +23,11 @@ subprojects {
 subprojects {
     project.evaluationDependsOn(':app')
 }
+
+// 运行gradle clean时，执行此处定义的task任务。
+// 该任务继承自Delete，删除根目录中的build目录。
+// 相当于执行Delete.delete(rootProject.buildDir)。
+// gradle使用groovy语言，调用method时可以不用加（）。
 
 task clean(type: Delete) {
     delete rootProject.buildDir
