@@ -5,6 +5,7 @@ import 'home/index.dart';
 import 'listener/pointer.dart';
 import 'listener/gesture.dart';
 import 'hero.dart';
+import 'customPaint.dart';
 class DrawerDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -87,6 +88,7 @@ class __DrawerListState extends State<_DrawerList> {
     _KeyValue(title: 'PointerDemo', subTitle: '监听点击事件的demo', value: () => PointerDemo()),
     _KeyValue(title: 'GestureDemo', subTitle: '手势相关的demo', value: () => GestureDemo()),
     _KeyValue(title: 'AnimationDemo', subTitle: '动画相关的demo', value: () => AnimationDemo()),
+    _KeyValue(title: 'CustomPaintDemo', subTitle: '自绘UI的demo', value: () => CustomPaintDemo()),
   ];
 
   @override

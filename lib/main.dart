@@ -28,6 +28,7 @@ class _MyAppState extends State<MyApp> {
     return new MaterialApp(
       title: '天歌',
       home: new Demo(),
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: themeColor,
         bottomAppBarTheme: BottomAppBarTheme(color: themeColor)
