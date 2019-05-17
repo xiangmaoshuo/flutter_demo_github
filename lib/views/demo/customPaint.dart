@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/tools/event_bus.dart';
+import 'dart:math' as math;
 class CustomPaintDemo extends StatelessWidget {
   final Size _size = Size(300, 300);
 
@@ -13,7 +14,11 @@ class CustomPaintDemo extends StatelessWidget {
         painter: _BgPainer(_size),
         child: RepaintBoundary(
           child: Center(
-            child: _PieceWidget(_size, size),
+            child: SizedBox(
+              width: _size.width,
+              height: _size.height,
+              child: _PieceWidget(_size, size),
+            ),
           ),
         ),
       ),
@@ -31,23 +36,52 @@ class _PieceWidget extends StatefulWidget {
   }
 }
 
-class __PieceWidgetState extends State<_PieceWidget> {
+class __PieceWidgetState extends State<_PieceWidget> with SingleTickerProviderStateMixin {
   List<Offset> whiteList = [];
   List<Offset> blackList = [];
   bool isWhite = true;
   bool isWin = false;
-  // 获取点击位置对应的棋盘位置
-  double _getPosition (num n, num pw) {
-    return ((n % pw > pw / 2 ? (n / pw).floor() + 1 : (n / pw).floor()) * pw).toDouble();
-  }
-
   final _sortHandler = (Offset a, Offset b) => a.dx.compareTo(b.dx);
   final _conpareHandler = (Offset current, Offset lastItem) => current.dx - lastItem.dx;
   final _sortHandlerY = (Offset a, Offset b) => a.dy.compareTo(b.dy);
   final _conpareHandlerY = (Offset current, Offset lastItem) => current.dy - lastItem.dy;
+  AnimationController _controller;
+  // 统计旋转次数
+  int rotateIndex = 0;
+  // 盒子居中后，距离屏幕左侧的距离
+  double get diffx => (widget.screenSize.width - widget.boxSize.width) / 2;
+
+  // 盒子居中后，距离屏幕顶部的距离
+  double get diffy => (widget.screenSize.height - widget.boxSize.height) / 2;
+
+  // 格子之间的间距
+  double get pw => widget.boxSize.width / 15;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      lowerBound: -double.infinity,
+      upperBound: double.infinity,
+      duration: Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _controller.value = 0.0;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
+
+  // 获取点击位置对应的棋盘位置
+  double _getPosition (num n) {
+    return ((n % pw > pw / 2 ? (n / pw).floor() + 1 : (n / pw).floor()) * pw).toDouble();
+  }
 
   // 检查每个列，看看是否有5个连在一起的
-  bool _checkList (List<Offset> list, sortHandler, compareHandler, double pw) {
+  bool _checkList (List<Offset> list, sortHandler, compareHandler) {
     if (list.length > 4) {
       list.sort(sortHandler);
       final List<Offset> winList = [list[0]];
@@ -64,7 +98,7 @@ class __PieceWidgetState extends State<_PieceWidget> {
   }
 
   // 检查谁赢了
-  _checkWhoWin (Offset offset, double pw) {
+  _checkWhoWin (Offset offset) {
     final List list = isWhite ? whiteList : blackList;
     final int length = list.length;
     List<Offset> horizontal = []; // 横
@@ -85,31 +119,83 @@ class __PieceWidgetState extends State<_PieceWidget> {
       if (tdx - tdy == reduce) rightOblique.add(target);
     }
     
-    isWin = _checkList(leftOblique, _sortHandler, _conpareHandler, pw)
-      || _checkList(rightOblique, _sortHandler, _conpareHandler, pw)
-      || _checkList(vertical, _sortHandlerY, _conpareHandlerY, pw)
-      || _checkList(horizontal, _sortHandler, _conpareHandler, pw);
-    if (isWin) print('${isWhite ? 'white' : 'black'} win !!');
+    isWin = _checkList(leftOblique, _sortHandler, _conpareHandler)
+      || _checkList(rightOblique, _sortHandler, _conpareHandler)
+      || _checkList(vertical, _sortHandlerY, _conpareHandlerY)
+      || _checkList(horizontal, _sortHandler, _conpareHandler);
   }
   
   @override
   Widget build(BuildContext context) {
-    double diffx = (widget.screenSize.width - widget.boxSize.width) / 2;
-    double diffy = (widget.screenSize.height - widget.boxSize.height) / 2;
-    double pw = widget.boxSize.width / 15; // 棋盘间距
+    final List<Widget> list = [
+      Positioned(
+        left: 0,
+        top: 0,
+        child: CustomPaint(
+          size: widget.boxSize,
+          painter: _PiecePainer(list: whiteList, color: Colors.white, update: !isWin && !isWhite),
+        ),
+      ),
+      Positioned(
+        left: 0,
+        top: 0,
+        child: CustomPaint(
+          size: widget.boxSize,
+          painter: _PiecePainer(list: blackList, color: Colors.black, update: !isWin && isWhite),
+        ),
+      )
+    ];
+    if (isWin) {
+      list.add(Positioned(
+        left: 75,
+        top: 126,
+        child: SizedBox(
+          width: 150,
+          height: 48,
+          child: Material(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                IconButton(
+                  icon: AnimatedBuilder(
+                    animation: _controller,
+                    builder: (_, __) {
+                      return Transform.rotate(
+                        angle: _controller.value,
+                        child: Icon(Icons.refresh),
+                      );
+                    },
+                  ),
+                  onPressed: () {
+                    _controller.animateTo(++rotateIndex * math.pi * 2);
+                    setState(() {
+                    whiteList = [];
+                    blackList = [];
+                    isWhite = true;
+                    isWin = false; 
+                    });
+                  },
+                ),
+                Text('${isWhite ? 'black' : 'white'} win !!')
+              ],
+            ),
+          ),
+        ),
+      ));
+    }
     return Listener(
-      child: CustomPaint(
-        size: widget.boxSize,
-        painter: _PiecePainer(whiteList: whiteList, blackList: blackList),
+      child: Stack(
+        children: list,
       ),
       onPointerDown: (event) {
         if (isWin) return;
-        final Offset offset = Offset(_getPosition(event.position.dx - diffx, pw), _getPosition(event.position.dy - diffy, pw));
+        final Offset offset = Offset(_getPosition(event.position.dx - diffx), _getPosition(event.position.dy - diffy));
+        
         if (whiteList.indexOf(offset) >= 0 || blackList.indexOf(offset) >= 0) return;
         setState(() {
           if (isWhite) whiteList.add(offset);
           else blackList.add(offset);
-          _checkWhoWin(offset, pw);
+          _checkWhoWin(offset);
           isWhite = !isWhite;
         });
       },
@@ -168,10 +254,10 @@ class _BgPainer extends CustomPainter {
 
 // 棋子
 class _PiecePainer extends CustomPainter {
-  _PiecePainer({ this.whiteList = const [], this.blackList = const [] }): super();
-  final List<Offset> whiteList;
-  final List<Offset> blackList;
-
+  _PiecePainer({ this.list = const [], @required this.color, this.update }): super();
+  final List<Offset> list;
+  final Color color;
+  final bool update;
   // 绘制黑白点
   _drawCircle (list, paint, color, canvas) {
     for(int i = 0; i < list.length; i++) {
@@ -184,11 +270,10 @@ class _PiecePainer extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     Paint paint = Paint()
     ..style = PaintingStyle.fill;
-    _drawCircle(whiteList, paint, Colors.white, canvas);
-    _drawCircle(blackList, paint, Colors.black, canvas);
+    _drawCircle(list, paint, color, canvas);
   }
   @override
   bool shouldRepaint(_PiecePainer oldDelegate) {
-    return true;
+    return update;
   }
 }
