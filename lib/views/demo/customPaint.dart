@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
-
+import 'package:flutter_demo/tools/event_bus.dart';
 class CustomPaintDemo extends StatelessWidget {
   final Size _size = Size(300, 300);
 
@@ -33,11 +32,64 @@ class _PieceWidget extends StatefulWidget {
 }
 
 class __PieceWidgetState extends State<_PieceWidget> {
-  List<Offset> list = [];
-
+  List<Offset> whiteList = [];
+  List<Offset> blackList = [];
+  bool isWhite = true;
+  bool isWin = false;
   // 获取点击位置对应的棋盘位置
   double _getPosition (num n, num pw) {
     return ((n % pw > pw / 2 ? (n / pw).floor() + 1 : (n / pw).floor()) * pw).toDouble();
+  }
+
+  final _sortHandler = (Offset a, Offset b) => a.dx.compareTo(b.dx);
+  final _conpareHandler = (Offset current, Offset lastItem) => current.dx - lastItem.dx;
+  final _sortHandlerY = (Offset a, Offset b) => a.dy.compareTo(b.dy);
+  final _conpareHandlerY = (Offset current, Offset lastItem) => current.dy - lastItem.dy;
+
+  // 检查每个列，看看是否有5个连在一起的
+  bool _checkList (List<Offset> list, sortHandler, compareHandler, double pw) {
+    if (list.length > 4) {
+      list.sort(sortHandler);
+      final List<Offset> winList = [list[0]];
+      final length = list.length;
+      for (int j = 1; j < length; j++) {
+        final current = list[j];
+        final len = winList.length;
+        if (compareHandler(current, winList[len - 1]) != pw) winList.removeRange(0, len);
+        winList.add(current);
+        if (winList.length == 5) return true; // 如果长度为5，则表示已经赢了
+      }
+    }
+    return false;
+  }
+
+  // 检查谁赢了
+  _checkWhoWin (Offset offset, double pw) {
+    final List list = isWhite ? whiteList : blackList;
+    final int length = list.length;
+    List<Offset> horizontal = []; // 横
+    List<Offset> vertical = []; // 竖
+    List<Offset> leftOblique = []; // 撇
+    List<Offset> rightOblique = []; //捺
+    final dx = offset.dx;
+    final dy = offset.dy;
+    final increase = dx + dy;
+    final reduce = dx - dy;
+    for(int i = 0; i < length; i++) {
+      final target = list[i];
+      final tdx = target.dx;
+      final tdy = target.dy;
+      if (tdx == dx) vertical.add(target);
+      if (tdy == dy) horizontal.add(target);
+      if (tdx + tdy == increase) leftOblique.add(target);
+      if (tdx - tdy == reduce) rightOblique.add(target);
+    }
+    
+    isWin = _checkList(leftOblique, _sortHandler, _conpareHandler, pw)
+      || _checkList(rightOblique, _sortHandler, _conpareHandler, pw)
+      || _checkList(vertical, _sortHandlerY, _conpareHandlerY, pw)
+      || _checkList(horizontal, _sortHandler, _conpareHandler, pw);
+    if (isWin) print('${isWhite ? 'white' : 'black'} win !!');
   }
   
   @override
@@ -48,13 +100,17 @@ class __PieceWidgetState extends State<_PieceWidget> {
     return Listener(
       child: CustomPaint(
         size: widget.boxSize,
-        painter: _PiecePainer(list: list),
+        painter: _PiecePainer(whiteList: whiteList, blackList: blackList),
       ),
       onPointerDown: (event) {
+        if (isWin) return;
         final Offset offset = Offset(_getPosition(event.position.dx - diffx, pw), _getPosition(event.position.dy - diffy, pw));
-        if (list.indexOf(offset) >= 0) return;
+        if (whiteList.indexOf(offset) >= 0 || blackList.indexOf(offset) >= 0) return;
         setState(() {
-          list.add(offset);
+          if (isWhite) whiteList.add(offset);
+          else blackList.add(offset);
+          _checkWhoWin(offset, pw);
+          isWhite = !isWhite;
         });
       },
     );
@@ -112,18 +168,24 @@ class _BgPainer extends CustomPainter {
 
 // 棋子
 class _PiecePainer extends CustomPainter {
-  _PiecePainer({ this.list = const [] }): super();
-  final List<Offset> list;
+  _PiecePainer({ this.whiteList = const [], this.blackList = const [] }): super();
+  final List<Offset> whiteList;
+  final List<Offset> blackList;
+
+  // 绘制黑白点
+  _drawCircle (list, paint, color, canvas) {
+    for(int i = 0; i < list.length; i++) {
+      paint..color = color;
+      canvas.drawCircle(list[i], 7.5, paint);
+    }
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     Paint paint = Paint()
     ..style = PaintingStyle.fill;
-    final white = Colors.white;
-    final black = Colors.black;
-    for(int i = 0; i < list.length; i++) {
-      paint..color = i % 2 == 0 ? white : black;
-      canvas.drawCircle(list[i], 7.5, paint);
-    }
+    _drawCircle(whiteList, paint, Colors.white, canvas);
+    _drawCircle(blackList, paint, Colors.black, canvas);
   }
   @override
   bool shouldRepaint(_PiecePainer oldDelegate) {
