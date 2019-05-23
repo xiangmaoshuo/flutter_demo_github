@@ -44,24 +44,32 @@ class ScaffedWithBottomBarDemo extends StatefulWidget {
 }
 
 class _ScaffedWithBottomBarDemoState extends State<ScaffedWithBottomBarDemo> {
-  Widget currentView;
-
+  int currentIndex;
   changeHandler(i) {
     setState(() {
-     currentView = widget.views[i]; 
+     currentIndex = i; 
     });
   }
 
   @override
   void initState() {
     super.initState();
-    currentView = widget.views[widget.currentIndex];
+    currentIndex = widget.currentIndex;
   }
 
   @override
   Widget build(BuildContext context) {
+    int n = -1;
     return Scaffold(
-      body: currentView,
+      body: Stack(
+        children: widget.views.map((item) {
+          n++;
+          return Offstage(
+            offstage: n != currentIndex,
+            child: item,
+          );
+        }).toList(),
+      ),
       bottomNavigationBar: _ShareDataWidget(
         child: _BottomNavigationBarDemo(changeHandler: changeHandler),
         items: widget.items,

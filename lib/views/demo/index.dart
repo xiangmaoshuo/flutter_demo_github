@@ -31,7 +31,7 @@ class Demo extends StatelessWidget {
           ],
           drawer: DrawerDemo(),
         ),
-        CustomScrollViewDemo(),
+       CustomScrollViewDemo(),
       ],
     );
   }
