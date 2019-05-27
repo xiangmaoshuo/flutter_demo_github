@@ -41,7 +41,9 @@ class _ScaffedDemoState extends State<ScaffedDemo> with SingleTickerProviderStat
         children: <Widget>[
           TabBarView(
             controller: _tabController,
-            children: widget.children,
+            children: widget.children.map((item) {
+              return _TabBarChild(child: item,);
+            }).toList(),
           ),
           MessageDemo(),
         ],
@@ -68,3 +70,24 @@ class _ScaffedDemoState extends State<ScaffedDemo> with SingleTickerProviderStat
     );
   }
 }
+
+class _TabBarChild extends StatefulWidget {
+  _TabBarChild({ Key key, this.child }) : super(key: key);
+  final Widget child;
+  @override
+  State<_TabBarChild> createState() {
+    return new __TabBarChildState();
+  }
+}
+
+class __TabBarChildState extends State<_TabBarChild> with AutomaticKeepAliveClientMixin {
+
+  get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
+  }
+}
+
