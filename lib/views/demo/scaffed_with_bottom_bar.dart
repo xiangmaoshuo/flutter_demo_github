@@ -45,9 +45,13 @@ class ScaffedWithBottomBarDemo extends StatefulWidget {
 
 class _ScaffedWithBottomBarDemoState extends State<ScaffedWithBottomBarDemo> {
   int currentIndex;
+  List<Widget> cache = []; // 缓存view列表
   changeHandler(i) {
     setState(() {
-     currentIndex = i; 
+      currentIndex = i;
+      if (cache.indexOf(widget.views[i]) == -1) {
+        cache.add(widget.views[i]);
+      }
     });
   }
 
@@ -55,6 +59,7 @@ class _ScaffedWithBottomBarDemoState extends State<ScaffedWithBottomBarDemo> {
   void initState() {
     super.initState();
     currentIndex = widget.currentIndex;
+    cache.add(widget.views[widget.currentIndex]);
   }
 
   @override
@@ -62,7 +67,7 @@ class _ScaffedWithBottomBarDemoState extends State<ScaffedWithBottomBarDemo> {
     int n = -1;
     return Scaffold(
       body: Stack(
-        children: widget.views.map((item) {
+        children: cache.map((item) {
           n++;
           return Offstage(
             offstage: n != currentIndex,
