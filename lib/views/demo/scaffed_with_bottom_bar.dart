@@ -44,39 +44,31 @@ class ScaffedWithBottomBarDemo extends StatefulWidget {
 }
 
 class _ScaffedWithBottomBarDemoState extends State<ScaffedWithBottomBarDemo> {
-  int currentIndex;
-  List<Widget> cache = []; // 缓存view列表
-  changeHandler(i) {
-    setState(() {
-      currentIndex = i;
-      if (cache.indexOf(widget.views[i]) == -1) {
-        cache.add(widget.views[i]);
-      }
-    });
-  }
+  PageController _pageController;
 
   @override
   void initState() {
     super.initState();
-    currentIndex = widget.currentIndex;
-    cache.add(widget.views[widget.currentIndex]);
+    _pageController = PageController(initialPage: widget.currentIndex);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _pageController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    int n = -1;
     return Scaffold(
-      body: Stack(
-        children: cache.map((item) {
-          n++;
-          return Offstage(
-            offstage: n != currentIndex,
-            child: item,
-          );
+      body: PageView(
+        controller: _pageController,
+        children: widget.views.map((item) {
+          return _KeepAliveDemo(child: item);
         }).toList(),
       ),
       bottomNavigationBar: _ShareDataWidget(
-        child: _BottomNavigationBarDemo(changeHandler: changeHandler),
+        child: _BottomNavigationBarDemo(controller: _pageController),
         items: widget.items,
         type: widget.type,
         currentIndex: widget.currentIndex,
@@ -85,12 +77,32 @@ class _ScaffedWithBottomBarDemoState extends State<ScaffedWithBottomBarDemo> {
   }
 }
 
+class _KeepAliveDemo extends StatefulWidget {
+  _KeepAliveDemo({ Key key, this.child }) : super(key: key);
+  final Widget child;
+  @override
+  State<_KeepAliveDemo> createState() {
+    return new __KeepAliveDemoState();
+  }
+}
+
+class __KeepAliveDemoState extends State<_KeepAliveDemo> with AutomaticKeepAliveClientMixin {
+  get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
+  }
+}
+
+
 // 底部导航栏的内部实现
 class _BottomNavigationBarDemo extends StatefulWidget {
-  final Function changeHandler;
+  final PageController controller;
   _BottomNavigationBarDemo({
     Key key,
-    @required this.changeHandler
+    @required this.controller
   }): super(key: key);
 
   @override
@@ -100,15 +112,27 @@ class _BottomNavigationBarDemo extends StatefulWidget {
 }
 
 class _BottomNavigationBarDemoState extends State<_BottomNavigationBarDemo> {
+  Duration _duration = Duration(milliseconds: 300);
   int _currentIndex;
   _ShareDataWidget _store;
   
+  @override
+  void initState() {
+    super.initState();
+    final _controller = widget.controller;
+    _controller.addListener(() {
+      setState(() {
+        _currentIndex = _controller.page.round(); 
+      });
+    });
+  }
+
   _changeCurrentIndex(int i) {
     setState(() {
       _currentIndex = i; 
     });
-    assert(widget.changeHandler != null); // 判断一下
-    widget.changeHandler(i);
+    assert(widget.controller != null); // 判断一下
+    widget.controller.animateToPage(i, duration: _duration, curve: Curves.easeOut);
   }
 
   @override
