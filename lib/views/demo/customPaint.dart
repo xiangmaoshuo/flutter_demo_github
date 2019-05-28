@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_demo/tools/event_bus.dart';
 import 'dart:math' as math;
 class CustomPaintDemo extends StatelessWidget {
   final Size _size = Size(300, 300);
