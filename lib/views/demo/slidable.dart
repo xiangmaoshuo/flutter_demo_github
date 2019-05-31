@@ -28,17 +28,23 @@ class _SlidableDemoState extends State<SlidableDemo> {
       color: Colors.black45,
       icon: Icons.more_horiz,
     ),
-    new IconSlideAction(
-      caption: 'Delete',
-      color: Colors.red,
-      icon: Icons.delete,
-      onTap: () {
-        print('onTap');
-        return true;
+    Builder(
+      builder: (context) {
+        return IconSlideAction(
+          caption: 'Delete',
+          color: Colors.red,
+          icon: Icons.delete,
+          onTap: () {
+            print('onTap true');
+            Slidable.of(context).close(); // 虽然设置了closeOnTap：false，但是可以手动调用关闭
+          },
+          closeOnTap: false,
+        );
       },
     ),
   ];
   final SlidableController _controller = SlidableController();
+  int number = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +57,14 @@ class _SlidableDemoState extends State<SlidableDemo> {
         itemCount: 30,
         itemBuilder: (context, index) {
           return Slidable(
+            key: Key('$index'),
+            slideToDismissDelegate: SlideToDismissDrawerDelegate(
+              onDismissed: (type) {
+                print(type);
+              }
+            ),
             controller: _controller,
+            closeOnScroll: true, // 为false时，感觉有bug
             delegate: SlidableDrawerDelegate(),
             actionExtentRatio: 0.2,
             child: CustomPaint(
@@ -62,8 +75,8 @@ class _SlidableDemoState extends State<SlidableDemo> {
                   child: Text('${index + 1}'),
                   foregroundColor: _themeData.primaryTextTheme.body2.color,
                 ),
-                title: Text('Tile for ${index + 1}'),
-                subtitle: Text('SubTitle for ${index + 1}'),
+                title: Text('Tile for ${index + 1} - $number'),
+                subtitle: Text('SubTitle for ${index + 1} - $number')
               ),
             ),
             actions: _actions,

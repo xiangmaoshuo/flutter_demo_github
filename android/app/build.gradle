@@ -1,7 +1,10 @@
 // 网上找到的配置博客 https://www.jianshu.com/p/c11862136abf
+// https://www.cnblogs.com/travellife/p/Gradle-shi-xian-Android-duo-qu-dao-ding-zhi-hua-da.html, 这个比较全
+// https://www.jianshu.com/p/ad423ed030b6
 
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
+
 if (localPropertiesFile.exists()) {
     localPropertiesFile.withReader('UTF-8') { reader ->
         localProperties.load(reader)
@@ -35,6 +38,8 @@ def keystorePropertiesFile = rootProject.file("key.properties")
 def keystoreProperties = new Properties()
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
+def baseAppId = "com.example.flutter_demo"
+
 android {
     compileSdkVersion 28
 
@@ -43,13 +48,13 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.example.flutter_demo.xms.debug"
+        applicationId "${baseAppId}"
         minSdkVersion 16
         targetSdkVersion 28
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner" // 表明要使用AndroidJUnitRunner进行单元测试。
+        manifestPlaceholders = [ app_label :"苑歌", app_icon: "@mipmap/ic_launcher" ]
     }
 
     signingConfigs {
@@ -60,13 +65,43 @@ android {
             storePassword keystoreProperties['storePassword']
         }
     }
+    // 如果对于debug版本和release版本有不同的配置，可以考虑使用AndroidManifest.xml配置文件来配置
+    // 也可以如下，直接修改对应文本
     buildTypes {
         release {
-            // minifyEnabled true/false  // 是否混淆代码
-            // proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'// 指定混淆的规则文件
+            minifyEnabled true  // 是否压缩代码
+            useProguard true // 是否混淆代码
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'// 指定混淆的规则文件
             signingConfig signingConfigs.release
+            buildConfigField "boolean", "LOG_DEBUG", "false" // 这是是buildConfigField的用法，在这里可以配置一个字段（如LOG_DEBUG），然后在代码中使用BuildConfig.LOG_DEBUG
+        }
+
+        debug {
+           applicationIdSuffix "debug"
+           manifestPlaceholders = [ app_label :"苑歌_debug", app_icon: "@mipmap/ic_launcher_debug" ]
+           buildConfigField "boolean", "LOG_DEBUG", "true"
         }
     }
+
+    /*
+        buildTypes：确定打包的模式，默认有debug和release模式
+        productFlavors：是在buildTypes的基础上，我们需要对应多种场景，比如什么utc环境的release版本，test环境的release版本。
+        productFlavors里面的配置会继承defaultConfig的配置
+    */
+    // productFlavors {
+    //     // 线上环境
+    //     xianshang {
+    //         applicationId "${baseAppId}.release"
+    //         manifestPlaceholders = [ app_label :"苑歌", app_icon: "@mipmap/ic_launcher" ]
+    //         // buildConfigField 'String', 'BASE_URL', '"http://xxx.xxx.xxxx"' //正式环境下的网络请求基地址
+    //         // resValue "string", "app_name", "XXX"//正式环境下app名称
+    //     }
+    //     // utc模式
+    //     utc {
+    //         applicationId "${baseAppId}.debug"
+    //         manifestPlaceholders = [ app_label :"苑歌—debug", app_icon: "@mipmap/ic_launcher" ]
+    //     }
+    // }
 }
 
 flutter {
