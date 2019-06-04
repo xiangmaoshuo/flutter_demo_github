@@ -40,6 +40,10 @@ keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 def baseAppId = "com.example.flutter_demo"
 
+static def releaseTime() {
+    return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
+}
+
 android {
     compileSdkVersion 28
 
@@ -102,6 +106,21 @@ android {
     //         manifestPlaceholders = [ app_label :"苑歌—debug", app_icon: "@mipmap/ic_launcher" ]
     //     }
     // }
+
+    // 自定义打包名称， debug版本需要固定名称，原因可能是flutter默认去找的是app-debug.apk这个文件名，你改了名称后，他找不到要报错
+    // release版本改名可以成功，但是控制台会报错:Gradle build failed to produce an Android package，由于对gradle不熟悉，目前可以忽略该错误，实际是打包成功了的
+    // 虽然有上面的小瑕疵，等以后再解决吧，目前使用没问题
+    applicationVariants.all {
+        variant ->
+            variant.outputs.all {
+                if (buildType.name == 'debug') {
+                    outputFileName = 'app-debug.apk'
+                } else {
+                    outputFileName  = "yuang_ge_v${defaultConfig.versionName}_${buildType.name}_${releaseTime()}.apk"
+                }
+            }
+
+    }
 }
 
 flutter {
