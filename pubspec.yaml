@@ -14,7 +14,7 @@ description: for love.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.2.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -32,9 +32,20 @@ dependencies:
   flutter_slidable: "^0.4.9"
   # 获取当前app的版本信息，app名称等
   package_info: ^0.4.0+2
+  # I/O文件读取
+  path_provider: ^0.5.0+1
+  # http请求库
+  dio: ^2.1.7
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  # json转dart类的库
+  # 原理： https://book.flutterchina.club/chapter10/json_model.html
+  # 文档： https://pub.flutter-io.cn/packages/json_model
+  json_model: ^0.0.2
+  # 可序列化JSON，可能是上面json_model包封装的不彻底还是咋的，导致项目中还得直接依赖该模块才能生成json_model对应的.g.dart文件
+  json_serializable: ^2.0.0
 
 
 # For information on the generic Dart part of this file, see the
