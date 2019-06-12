@@ -1,0 +1,8 @@
+{
+  "name": "xms",
+  "age": 26,
+  "email": "544436472@qq.com",
+  "ddd": "$persion",
+  "eee": "$[]persion",
+  "@JsonKey(name: '233') int": "fff"
+}

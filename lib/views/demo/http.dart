@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../tools/http.dart' show getFreeJson, Response;
+import '../../http/index.dart' show getFreeJson, ArticleList;
 
 class HttpDemo extends StatefulWidget {
   @override
@@ -10,19 +10,22 @@ class HttpDemo extends StatefulWidget {
 
 class _HttpDemoState extends State<HttpDemo> {
   bool _loading = false;
-  Response _response;
+  ArticleList _response;
   RaisedButton _reloadButton;
+
   final SizedBox _loadingBox = SizedBox(
     height: 24.0,
     width: 24.0,
     child: CircularProgressIndicator(strokeWidth: 2.0,),
   );
+
+  // 请求数据
   Future _getHttpData () async {
     setState(() {
      _loading = true; 
     });
-    final Response response = await getFreeJson(1);
-    print(response.data);
+    final ArticleList response = await getFreeJson(1);
+    print(response.toJson());
     setState(() {
      _loading = false;
      _response = response;
@@ -48,8 +51,7 @@ class _HttpDemoState extends State<HttpDemo> {
       _children.add(_loadingBox);
     } else {
       _children.addAll([
-        Text('${_response.request.uri.toString()}:', style: TextStyle(color: Theme.of(context).primaryColor),),
-        Text(_response.data.toString())
+        Text(_response.toJson().toString())
       ]);
     }
 

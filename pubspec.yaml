@@ -43,6 +43,7 @@ dev_dependencies:
   # json转dart类的库
   # 原理： https://book.flutterchina.club/chapter10/json_model.html
   # 文档： https://pub.flutter-io.cn/packages/json_model
+  # 生成/更新models的命令为: flutter packages pub run json_model
   json_model: ^0.0.2
   # 可序列化JSON，可能是上面json_model包封装的不彻底还是咋的，导致项目中还得直接依赖该模块才能生成json_model对应的.g.dart文件
   json_serializable: ^2.0.0

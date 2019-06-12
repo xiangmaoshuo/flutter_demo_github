@@ -1,0 +1,39 @@
+{
+	"StatefulWidget": {
+		"prefix": "ful",
+		"body": [
+			"class $1 extends StatefulWidget {",
+			"\t@override",
+			"\tState<$1> createState() {",
+			"\t\treturn new _$1State();",
+			"\t}",
+			"}\n",
+			"class _$1State extends State<$1> {",
+			"\t@override",
+			"\tWidget build(BuildContext context) {",
+			"\t\treturn null;",
+			"\t}",
+			"}\n"
+		],
+		"description": "快速创建StatefulWidget"
+	},
+	"StatelessWidget": {
+		"prefix": "less",
+		"body": [
+			"class $1 extends StatelessWidget {",
+			"\t@override",
+			"\tWidget build(BuildContext context) {",
+			"\t\treturn null;",
+			"\t}",
+			"}\n"
+		],
+		"description": "快速创建StatelessWidget"
+	},
+	"print": {
+		"prefix": "pt",
+		"body": [
+			"print($1);"
+		],
+		"description": "print()"
+	}
+}
