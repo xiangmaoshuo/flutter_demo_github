@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../http/index.dart' show getFreeJson, ArticleListItem;
+import './flutter_webview_plugin.dart';
 
 class HttpDemo extends StatefulWidget {
   @override
@@ -38,6 +39,15 @@ class _HttpDemoState extends State<HttpDemo> {
      _pageCount = response.pageCount;
      _list.addAll(response.datas);
     });
+  }
+
+  // 跳转到webview展示的详情页面
+  _turnToWebView (String url, [ String title ]) {
+    Navigator.push(context, new MaterialPageRoute(
+      builder: (context) {
+        return new FlutterWebviewDemo(url, title: title);
+      }
+    ));
   }
 
   @override
@@ -92,7 +102,13 @@ class _HttpDemoState extends State<HttpDemo> {
           final ArticleListItem item = _list[index];
 
           // 滑动删除
-          return ListTile(title: new Text(item.title), subtitle: Text('${item.author}   ${item.niceDate}'));
+          return ListTile(
+            title: new Text(item.title),
+            subtitle: Text('${item.author}   ${item.niceDate}'),
+            onTap: () {
+              _turnToWebView(item.link, item.title);
+            },
+          );
         },
       ),
       floatingActionButton: _showTopBtn ? _topBtn : null,
