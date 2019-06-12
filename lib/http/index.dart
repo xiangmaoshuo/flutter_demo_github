@@ -27,7 +27,7 @@ final _dioInstance = new Dio()
       return options;
     },
     onResponse: (Response response) {
-      return response.data['data'] as Map;
+      // return response.data['data'] as Map;
     },
     onError: (DioError error) {
       switch (error.response.statusCode) {

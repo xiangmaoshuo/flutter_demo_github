@@ -8,6 +8,7 @@ import 'hero.dart';
 import 'customPaint.dart';
 import 'slidable.dart';
 import 'http.dart';
+import 'flutter_webview_plugin.dart';
 class DrawerDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -93,6 +94,7 @@ class __DrawerListState extends State<_DrawerList> {
     _KeyValue(title: 'CustomPaintDemo', subTitle: '自绘UI的demo', value: () => CustomPaintDemo()),
     _KeyValue(title: 'SlidableDemo', subTitle: '列表滑动显示操作项demo', value: () => SlidableDemo()),
     _KeyValue(title: 'HttpDemo', subTitle: 'http请求demo', value: () => HttpDemo()),
+    _KeyValue(title: 'FlutterWebviewDemo', subTitle: 'http请求demo', value: () => FlutterWebviewDemo('https://gank.io/xiandu')),
   ];
 
   @override

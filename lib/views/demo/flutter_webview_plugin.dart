@@ -30,7 +30,7 @@ class _FlutterWebviewDemoState extends State<FlutterWebviewDemo> {
   Widget build(BuildContext context) {
     return WebviewScaffold(
       url: widget._url,
-      appBar: AppBar(
+      appBar: widget.title == null ? null : AppBar(
         title: Text(widget.title),
       ),
     );
