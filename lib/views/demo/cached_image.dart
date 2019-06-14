@@ -40,7 +40,24 @@ class _CachedImageDemoState extends State<CachedImageDemo> {
             _getData(_list.length ~/ 10 + 1);
             return LoadingDemo(loadingText: '求豆麻袋...');
           }
-          return PlaceHolderImageDemo(Image.network(_list[index], key: Key(_list[index]),), width: width, key: Key('$index'),);
+          bool isSuccess = false;
+          return GestureDetector(
+            child: Stack(
+              children: <Widget>[
+                PlaceHolderImageDemo(
+                  Image.network(_list[index]),
+                  width: width, key: Key('$index'),
+                  successHandler: (flag) { isSuccess = flag; },
+                ),
+                Positioned(
+                  child: Icon(Icons.favorite),
+                )
+              ],
+            ),
+            onLongPress: () {
+              if (isSuccess) bus.emit('setFavorateImg', _list[index]);
+            },
+          );
           // return Image.network(_list[index]); // 自带的这种不会缓存
           // // 下面这种会缓存
           // return CachedNetworkImage(

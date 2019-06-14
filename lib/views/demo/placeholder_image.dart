@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import './loading.dart';
 
+typedef void Successhandler(bool isSuccess);
+
 /**
  * 实现原理：利用了[ImageProvider]的[ImageProvider.resolve]方法实现，Image类下面的几个构造函数([Image.asset],[Image.network]...)都是基于[ImageProvider]实现，
  * 在Image Widget的build方法中最终都会去调用[ImageProvider.resolve]方法，该方法返回的是一个[Stream]，[Image]的实现上就是去根据得到的这个[Stream]来得到图片信息，最终渲染成图片的。
@@ -19,6 +21,7 @@ class PlaceHolderImageDemo extends StatefulWidget {
     this.aspect = 1,
     this.loading = const LoadingDemo(),
     this.error = const LoadingDemo(loadingText: '加载失败',),
+    this.successHandler,
   }) : super(key: key);
 
   /// 要加载的图片
@@ -27,7 +30,7 @@ class PlaceHolderImageDemo extends StatefulWidget {
   /// 加载中的模块， 默认是[const LoadingDemo()]
   final Widget loading;
 
-  /// 加载失败的模块，默认提示：error文本
+  /// 加载失败的模块，默认是：[const LoadingDemo(loadingText: '加载失败')]
   final Widget error;
 
   /// 图片的宽度，必传
@@ -35,6 +38,9 @@ class PlaceHolderImageDemo extends StatefulWidget {
 
   /// 图片的宽高比，默认是1：1
   final double aspect;
+
+  final Successhandler successHandler;
+
   @override
   State<PlaceHolderImageDemo> createState() {
     return new _PlaceHolderImageState();
@@ -44,27 +50,29 @@ class PlaceHolderImageDemo extends StatefulWidget {
 class _PlaceHolderImageState extends State<PlaceHolderImageDemo> {
   Widget _finalImage;
   ImageStream _stream;
-  /// 对外暴露，当前图片是否加载完成
-  bool isSuccess = false;
 
   // 监听加载的回调
   _listener(ImageInfo imginfo, bool flag) {
-    isSuccess = true;
-    _finalImage = widget._image;
+    if (widget.successHandler != null) widget.successHandler(true);
+    setState(() {
+     _finalImage = widget._image; 
+    });
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void initState() {
+    super.initState();
     // loading..
     _finalImage = widget.loading;
     _stream = widget._image.image.resolve(ImageConfiguration.empty)
     ..addListener(
       _listener,
       onError: (exception, StackTrace stackTrace) {
-        isSuccess = false;
+        if (widget.successHandler != null) widget.successHandler(false);
         // 加载失败widget
-        _finalImage = widget.error;
+        setState(() {
+         _finalImage = widget.error; 
+        });
       }
     );
   }
