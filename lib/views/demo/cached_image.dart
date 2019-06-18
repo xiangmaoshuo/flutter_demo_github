@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../http/index.dart' show getGankJson;
 import 'placeholder_image.dart';
 import 'loading.dart';
-import 'package:flutter_demo/bloc/index.dart';
+import 'package:flutter_demo/bloc/index.dart' show BlocBuilder, BlocProvider, StateDispatchBloc;
 
 class CachedImageDemo extends StatefulWidget {
   @override
@@ -29,7 +29,7 @@ class _CachedImageDemoState extends State<CachedImageDemo> {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final primaryColor = Theme.of(context).primaryColor;
-    final bloc = BlocProvider.of<FavorateBloc>(context);
+    final bloc = BlocProvider.of<StateDispatchBloc<List<String>>>(context);
     return Material(
       child: ListView.separated(
         separatorBuilder: (context, index) {

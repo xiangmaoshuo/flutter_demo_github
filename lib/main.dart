@@ -3,7 +3,7 @@ import 'package:flutter/services.dart' show SystemChrome, DeviceOrientation;
 
 import 'views/demo/index.dart';
 import 'tools/event_bus.dart';
-import 'bloc/index.dart' show BlocProviderTree, BlocProvider, FavorateBloc;
+import 'bloc/index.dart' show BlocProviderTree, BlocProvider, StateDispatchBloc;
 class MyApp extends StatefulWidget {
   @override
   State<MyApp> createState() {
@@ -29,7 +29,7 @@ class _MyAppState extends State<MyApp> {
       title: '天歌',
       home: BlocProviderTree(
         blocProviders: [
-          BlocProvider<FavorateBloc>(builder: (context) => new FavorateBloc())
+          BlocProvider<StateDispatchBloc<List<String>>>(builder: (context) => new StateDispatchBloc<List<String>>([]))
         ],
         child: new Demo(),
       ),
