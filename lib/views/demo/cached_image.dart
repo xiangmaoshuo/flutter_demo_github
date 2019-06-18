@@ -70,6 +70,7 @@ class _CachedImageDemoState extends State<CachedImageDemo> {
                 final currentItem = _list[index];
                 if (list.contains(currentItem)) list.remove(currentItem);
                 else list.add(currentItem);
+                if (list.length > 2) list.removeAt(0); // 只保留2个
                 bloc.dispatch(list);
               }
             },

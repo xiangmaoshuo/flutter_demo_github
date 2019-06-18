@@ -9,11 +9,13 @@ import 'slidable.dart';
 import 'http.dart';
 import 'flutter_webview_plugin.dart';
 import 'hero.dart' show HeroPage;
+import 'package:flutter_demo/bloc/index.dart' show BlocBuilder, BlocProvider, FavorateBloc;
 
 class DrawerDemo extends StatelessWidget {
   final _headerImg = Image.asset('lib/images/launch_background.png',width: 40, height: 40, fit: BoxFit.fitWidth,);
   @override
   Widget build(BuildContext context) {
+    final bloc = BlocProvider.of<FavorateBloc>(context);
     return Builder(builder: (context) {
       return Drawer(
           child: MediaQuery.removePadding(
@@ -30,7 +32,13 @@ class DrawerDemo extends StatelessWidget {
                       Padding(
                         padding: EdgeInsets.only(right: 10.0),
                         child: ClipOval(
-                          child: HeroPage(child: _headerImg, tag: #header,),
+                          child: BlocBuilder(
+                            bloc: bloc,
+                            builder: (context, List<String> state) {
+                              final img = state.length > 1 ? Image.network(state[1], width: 40, height: 40, fit: BoxFit.cover) : _headerImg;
+                              return HeroPage(child: img, tag: #header,);
+                            },
+                          )
                         ),
                       ),
                       Text('恰当的模样', style: TextStyle(

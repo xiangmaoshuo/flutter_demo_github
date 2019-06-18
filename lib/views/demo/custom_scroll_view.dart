@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_demo/bloc/index.dart' show BlocBuilder, BlocProvider, FavorateBloc;
 
 class CustomScrollViewDemo extends StatefulWidget {
   @override
@@ -37,6 +38,8 @@ class _CustomScrollViewDemoState extends State<CustomScrollViewDemo> {
 
   @override
   Widget build(BuildContext context) {
+    final bloc = BlocProvider.of<FavorateBloc>(context);
+    final color = Theme.of(context).primaryColor;
     return Material(
       child: NotificationListener<ScrollNotification>(
         onNotification: (ScrollNotification notification) {
@@ -63,7 +66,14 @@ class _CustomScrollViewDemoState extends State<CustomScrollViewDemo> {
               expandedHeight:250.0,
               flexibleSpace: FlexibleSpaceBar(
                 title: showTopBtn ? null : const Text('custom_scroll_view', style: TextStyle(color: Colors.white),),
-                background: Image.asset('lib/images/demo.jpg', fit: BoxFit.cover, color: Colors.red, colorBlendMode: BlendMode.difference,),
+                background: BlocBuilder(
+                  bloc: bloc,
+                  builder: (context, List<String> state) {
+                    return state.isEmpty
+                      ? Image.asset('lib/images/demo.jpg', fit: BoxFit.fitWidth)
+                      : Image.network(state[0], fit: BoxFit.fitWidth);
+                  },
+                ),
               )
             ),
             SliverPadding(
