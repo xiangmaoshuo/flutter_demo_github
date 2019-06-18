@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import './loading.dart';
-
+import 'hero.dart' show HeroPage;
 typedef void Successhandler(bool isSuccess);
 
 /**
@@ -13,16 +13,21 @@ typedef void Successhandler(bool isSuccess);
  * 
  */
 
-/// 加载网络图片时的占位图片，并且处理了加载失败的逻辑；
+/// 加载网络图片时的占位图片，并且处理了加载失败的逻辑；图片的宽高可以使用传入图片所设置的宽高，但是如果给占位图设置了宽度，
 class PlaceHolderImageDemo extends StatefulWidget {
   PlaceHolderImageDemo(this._image, {
     Key key,
-    @required this.width,
-    this.aspect = 1,
+    this.width,
+    this.height,
+    this.hero = true,
     this.loading = const LoadingDemo(),
     this.error = const LoadingDemo(loadingText: '加载失败',),
+    this.tag,
     this.successHandler,
-  }) : super(key: key);
+  }) :  assert(width != null || _image.width != null, 'the width can`t be null, please set [this.width] or [_image.width]'),
+        assert(height != null || _image.height != null, 'the height can`t be null, please set [this.height] or [_image.height]'),
+        assert(!hero || tag != null, 'when [hero] is true, the [tag] is required'),
+        super(key: key);
 
   /// 要加载的图片
   final Image _image;
@@ -33,11 +38,17 @@ class PlaceHolderImageDemo extends StatefulWidget {
   /// 加载失败的模块，默认是：[const LoadingDemo(loadingText: '加载失败')]
   final Widget error;
 
-  /// 图片的宽度，必传
+  /// 图片的宽度
   final double width;
 
-  /// 图片的宽高比，默认是1：1
-  final double aspect;
+  /// 图片的高度
+  final double height;
+
+  /// 是否开启hero动画
+  final bool hero;
+
+  /// 如果[hero]为真，则[tag]是必传的
+  final Object tag;
 
   final Successhandler successHandler;
 
@@ -50,21 +61,34 @@ class PlaceHolderImageDemo extends StatefulWidget {
 class _PlaceHolderImageState extends State<PlaceHolderImageDemo> {
   Widget _finalImage;
   ImageStream _stream;
-
+  double _width;
+  double _height;
   // 监听加载的回调
   _listener(ImageInfo imginfo, bool flag) {
     if (widget.successHandler != null) widget.successHandler(true);
+    final img = widget._image;
+    final target = Image(
+      image: img.image,
+      width: _width,
+      height: _height,
+      fit: img.fit,
+      // 其他属性以后有需求时，可以在这里补充
+    );
     setState(() {
-     _finalImage = widget._image; 
+     _finalImage = widget.hero ? HeroPage(child: target, tag: widget.tag,) : target;
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
+  // 添加监听事件
+  _addListener () {
+    final img = widget._image;
     // loading..
-    _finalImage = widget.loading;
-    _stream = widget._image.image.resolve(ImageConfiguration.empty)
+    setState(() {
+      _width = widget.width ?? img.width;
+      _height = widget.height ?? img.height;
+     _finalImage = widget.loading;
+    });
+    _stream = img.image.resolve(ImageConfiguration.empty)
     ..addListener(
       _listener,
       onError: (exception, StackTrace stackTrace) {
@@ -78,18 +102,32 @@ class _PlaceHolderImageState extends State<PlaceHolderImageDemo> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _addListener();
+  }
+
+  @override
+  void didUpdateWidget(PlaceHolderImageDemo oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget._image != widget._image) {
+      _stream.removeListener(_listener);
+      _addListener();
+    }
+  }
+
+  @override
   void dispose() {
     _stream.removeListener(_listener);
     super.dispose();
   }
   @override
   Widget build(BuildContext context) {
-    final width = widget.width;
     return Container(
       color: Colors.white,
-      width: width,
-      height: width * widget.aspect,
-      child: Center(child: _finalImage,),
+      width: _width,
+      height: _height,
+      child: Center(child: _finalImage),
     );
   }
 }

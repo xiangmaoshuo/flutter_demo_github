@@ -3,7 +3,7 @@ import 'package:flutter/services.dart' show SystemChrome, DeviceOrientation;
 
 import 'views/demo/index.dart';
 import 'tools/event_bus.dart';
-
+import 'bloc/index.dart' show BlocProviderTree, BlocProvider, FavorateBloc;
 class MyApp extends StatefulWidget {
   @override
   State<MyApp> createState() {
@@ -27,7 +27,12 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return new MaterialApp(
       title: '天歌',
-      home: new Demo(),
+      home: BlocProviderTree(
+        blocProviders: [
+          BlocProvider<FavorateBloc>(builder: (context) => new FavorateBloc())
+        ],
+        child: new Demo(),
+      ),
       debugShowCheckedModeBanner: !bool.fromEnvironment('dart.vm.product'),
       theme: ThemeData(
         primarySwatch: themeColor,

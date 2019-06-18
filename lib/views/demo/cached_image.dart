@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart' show CachedNetworkImage;
+// import 'package:cached_network_image/cached_network_image.dart' show CachedNetworkImage;
 import '../../http/index.dart' show getGankJson;
-import '../../tools/event_bus.dart';
 import 'placeholder_image.dart';
 import 'loading.dart';
+import 'package:flutter_demo/bloc/index.dart';
+
 class CachedImageDemo extends StatefulWidget {
   @override
   State<CachedImageDemo> createState() {
@@ -12,7 +13,7 @@ class CachedImageDemo extends StatefulWidget {
 }
 
 class _CachedImageDemoState extends State<CachedImageDemo> {
-  List _list = [];
+  List<String> _list = [];
   bool _loadEnd = false;
 
   _getData(int page) {
@@ -27,6 +28,8 @@ class _CachedImageDemoState extends State<CachedImageDemo> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
+    final primaryColor = Theme.of(context).primaryColor;
+    final bloc = BlocProvider.of<FavorateBloc>(context);
     return Material(
       child: ListView.separated(
         separatorBuilder: (context, index) {
@@ -36,26 +39,39 @@ class _CachedImageDemoState extends State<CachedImageDemo> {
         itemBuilder: (context, index) {
           if (index == _list.length) {
             if (_loadEnd) return Text('我是有底线的...', textAlign: TextAlign.center,);
-            print(_list.length ~/ 10 + 1);
             _getData(_list.length ~/ 10 + 1);
             return LoadingDemo(loadingText: '求豆麻袋...');
           }
           bool isSuccess = false;
           return GestureDetector(
+            behavior: HitTestBehavior.deferToChild,
             child: Stack(
               children: <Widget>[
                 PlaceHolderImageDemo(
-                  Image.network(_list[index]),
-                  width: width, key: Key('$index'),
+                  Image.network(_list[index], fit: BoxFit.fitWidth, width: width, height: width,),
+                  hero: true,
+                  tag: 'CachedImageDemo-$index',
                   successHandler: (flag) { isSuccess = flag; },
                 ),
                 Positioned(
-                  child: Icon(Icons.favorite),
+                  right: 0,
+                  child: BlocBuilder(
+                    bloc: bloc,
+                    builder: (context, List<String> state) {
+                      return Icon(Icons.favorite, color: state.contains(_list[index]) ? primaryColor : Colors.transparent,);
+                    },
+                  ),
                 )
               ],
             ),
-            onLongPress: () {
-              if (isSuccess) bus.emit('setFavorateImg', _list[index]);
+            onDoubleTap: () {
+              if (isSuccess) {
+                final list = bloc.currentState.sublist(0);
+                final currentItem = _list[index];
+                if (list.contains(currentItem)) list.remove(currentItem);
+                else list.add(currentItem);
+                bloc.dispatch(list);
+              }
             },
           );
           // return Image.network(_list[index]); // 自带的这种不会缓存

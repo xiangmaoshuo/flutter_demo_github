@@ -4,12 +4,14 @@ import 'animation.dart';
 import 'home/index.dart';
 import 'listener/pointer.dart';
 import 'listener/gesture.dart';
-import 'hero.dart';
 import 'customPaint.dart';
 import 'slidable.dart';
 import 'http.dart';
 import 'flutter_webview_plugin.dart';
+import 'hero.dart' show HeroPage;
+
 class DrawerDemo extends StatelessWidget {
+  final _headerImg = Image.asset('lib/images/launch_background.png',width: 40, height: 40, fit: BoxFit.fitWidth,);
   @override
   Widget build(BuildContext context) {
     return Builder(builder: (context) {
@@ -27,27 +29,8 @@ class DrawerDemo extends StatelessWidget {
                     children: <Widget>[
                       Padding(
                         padding: EdgeInsets.only(right: 10.0),
-                        child: InkWell(
-                          child: Hero(
-                            tag: #head,
-                            child: ClipOval(
-                              child: Image.asset('lib/images/launch_background.png',width: 40, height: 40, fit: BoxFit.fitWidth,),
-                            ),
-                          ),
-                          onTap: () {
-                            Navigator.push(context, PageRouteBuilder(
-                              transitionDuration: Duration(milliseconds: 300),
-                              transitionsBuilder: (context, animation, animation2, child) {
-                                return ScaleTransition(
-                                  scale: animation,
-                                  child: child,
-                                );
-                              },
-                              pageBuilder: (context, animation, animation2) {
-                                return HeroDemo();
-                              }
-                            ));
-                          },
+                        child: ClipOval(
+                          child: HeroPage(child: _headerImg, tag: #header,),
                         ),
                       ),
                       Text('恰当的模样', style: TextStyle(
