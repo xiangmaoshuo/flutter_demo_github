@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 // import 'package:cached_network_image/cached_network_image.dart' show CachedNetworkImage;
 import '../../http/index.dart' show getGankJson;
-import 'placeholder_image.dart';
-import 'loading.dart';
+import 'placeholder_image.dart' show PlaceHolderImageDemo;
+import 'loading.dart' show LoadingDemo;
 import 'package:flutter_demo/bloc/index.dart' show BlocBuilder, BlocProvider, FavorateBloc;
 
 class CachedImageDemo extends StatefulWidget {

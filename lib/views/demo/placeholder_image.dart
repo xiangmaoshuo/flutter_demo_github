@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import './loading.dart';
 import 'hero.dart' show HeroPage;
+import 'package:flutter_demo/tools/const.dart' show errorImg;
 typedef void Successhandler(bool isSuccess);
 
 /**
