@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:convert' show base64;
+
 import './loading.dart';
 import 'hero.dart' show HeroPage;
 import 'package:flutter_demo/tools/const.dart' show errorImg;
@@ -26,21 +28,22 @@ enum PlaceHolderImageStatus {
 class PlaceHolderImageDemo extends StatefulWidget {
   PlaceHolderImageDemo(this._image, {
     Key key,
+    Image error,
     this.loading = const LoadingDemo(speed: .6),
-    this.error = const LoadingDemo(loadingText: '加载失败',),
     this.hero = true,
     this.tag,
     this.successHandler,
   }) :  assert(!hero || tag != null, 'when [hero] is true, the [tag] is required'),
+        error = new Image(image: MemoryImage(base64.decode(errorImg))),
         super(key: key);
 
   /// 要加载的图片
   final Image _image;
 
-  /// 加载中的模块， 默认是[const LoadingDemo()]
+  /// 加载中的模块
   final Widget loading;
 
-  /// 加载失败的模块，默认是：[const LoadingDemo(loadingText: '加载失败')]
+  /// 加载失败的模块
   final Widget error;
 
   /// 是否开启hero动画
@@ -119,9 +122,5 @@ class _PlaceHolderImageState extends State<PlaceHolderImageDemo> {
       default:
         throw FlutterError('The state should be one of [PlaceHolderImageStatus.loading, PlaceHolderImageStatus.success, PlaceHolderImageStatus.error]');
     }
-    // return FittedBox(
-    //   fit: BoxFit.contain,
-    //   child: _finalImage,
-    // );
   }
 }
