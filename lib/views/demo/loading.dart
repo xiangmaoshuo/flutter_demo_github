@@ -100,12 +100,9 @@ class _LoadingDemoState extends State<LoadingDemo> with TickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: _children.map<Widget>((item) => _Loadingitem(item, _itemDuration, _itemBuilder)).toList(),
-      ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: _children.map<Widget>((item) => _Loadingitem(item, _itemDuration, _itemBuilder)).toList(),
     );
   }
 }

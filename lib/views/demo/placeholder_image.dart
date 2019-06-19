@@ -2,7 +2,15 @@ import 'package:flutter/material.dart';
 import './loading.dart';
 import 'hero.dart' show HeroPage;
 import 'package:flutter_demo/tools/const.dart' show errorImg;
+
 typedef void Successhandler(bool isSuccess);
+
+// 图片加载的状态
+enum PlaceHolderImageStatus {
+  loading,
+  success,
+  error
+}
 
 /**
  * 实现原理：利用了[ImageProvider]的[ImageProvider.resolve]方法实现，Image类下面的几个构造函数([Image.asset],[Image.network]...)都是基于[ImageProvider]实现，
@@ -18,16 +26,12 @@ typedef void Successhandler(bool isSuccess);
 class PlaceHolderImageDemo extends StatefulWidget {
   PlaceHolderImageDemo(this._image, {
     Key key,
-    this.width,
-    this.height,
-    this.hero = true,
-    this.loading = const LoadingDemo(),
+    this.loading = const LoadingDemo(speed: .6),
     this.error = const LoadingDemo(loadingText: '加载失败',),
+    this.hero = true,
     this.tag,
     this.successHandler,
-  }) :  assert(width != null || _image.width != null, 'the width can`t be null, please set [this.width] or [_image.width]'),
-        assert(height != null || _image.height != null, 'the height can`t be null, please set [this.height] or [_image.height]'),
-        assert(!hero || tag != null, 'when [hero] is true, the [tag] is required'),
+  }) :  assert(!hero || tag != null, 'when [hero] is true, the [tag] is required'),
         super(key: key);
 
   /// 要加载的图片
@@ -38,12 +42,6 @@ class PlaceHolderImageDemo extends StatefulWidget {
 
   /// 加载失败的模块，默认是：[const LoadingDemo(loadingText: '加载失败')]
   final Widget error;
-
-  /// 图片的宽度
-  final double width;
-
-  /// 图片的高度
-  final double height;
 
   /// 是否开启hero动画
   final bool hero;
@@ -60,43 +58,30 @@ class PlaceHolderImageDemo extends StatefulWidget {
 }
 
 class _PlaceHolderImageState extends State<PlaceHolderImageDemo> {
-  Widget _finalImage;
+  PlaceHolderImageStatus status;
   ImageStream _stream;
-  double _width;
-  double _height;
   // 监听加载的回调
   _listener(ImageInfo imginfo, bool flag) {
     if (widget.successHandler != null) widget.successHandler(true);
-    final img = widget._image;
-    final target = Image(
-      image: img.image,
-      width: _width,
-      height: _height,
-      fit: img.fit,
-      // 其他属性以后有需求时，可以在这里补充
-    );
     setState(() {
-     _finalImage = widget.hero ? HeroPage(child: target, tag: widget.tag,) : target;
+     status = PlaceHolderImageStatus.success;
     });
   }
 
   // 添加监听事件
   _addListener () {
-    final img = widget._image;
     // loading..
     setState(() {
-      _width = widget.width ?? img.width;
-      _height = widget.height ?? img.height;
-     _finalImage = widget.loading;
+     status = PlaceHolderImageStatus.loading;
     });
-    _stream = img.image.resolve(ImageConfiguration.empty)
+    _stream = widget._image.image.resolve(ImageConfiguration.empty)
     ..addListener(
       _listener,
       onError: (exception, StackTrace stackTrace) {
         if (widget.successHandler != null) widget.successHandler(false);
         // 加载失败widget
         setState(() {
-         _finalImage = widget.error; 
+         status = PlaceHolderImageStatus.error; 
         });
       }
     );
@@ -112,7 +97,7 @@ class _PlaceHolderImageState extends State<PlaceHolderImageDemo> {
   void didUpdateWidget(PlaceHolderImageDemo oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget._image != widget._image) {
-      _stream.removeListener(_listener);
+      _stream?.removeListener(_listener);
       _addListener();
     }
   }
@@ -124,11 +109,19 @@ class _PlaceHolderImageState extends State<PlaceHolderImageDemo> {
   }
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      width: _width,
-      height: _height,
-      child: Center(child: _finalImage),
-    );
+    switch (status) {
+      case PlaceHolderImageStatus.loading:
+        return Center(child: widget.loading);
+      case PlaceHolderImageStatus.success:
+        return widget.hero ? HeroPage(child: widget._image, tag: widget.tag,) : widget._image;
+      case PlaceHolderImageStatus.error:
+        return widget.error;
+      default:
+        throw FlutterError('The state should be one of [PlaceHolderImageStatus.loading, PlaceHolderImageStatus.success, PlaceHolderImageStatus.error]');
+    }
+    // return FittedBox(
+    //   fit: BoxFit.contain,
+    //   child: _finalImage,
+    // );
   }
 }

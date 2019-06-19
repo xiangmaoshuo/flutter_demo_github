@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'placeholder_image.dart' show PlaceHolderImageDemo;
 import 'loading.dart' show LoadingDemo;
-import 'package:flutter_demo/bloc/index.dart' show BlocBuilder, BlocProvider, FavorateBloc;
 import '../../http/index.dart' show getGankJson;
+import './bg_paint.dart' show BgPaint;
 
 class StaggeredGridDemo extends StatefulWidget {
   @override
@@ -44,7 +44,6 @@ class _StaggeredGridDemoState extends State<StaggeredGridDemo> {
   @override
   Widget build(BuildContext context) {
     final len = _countList.length;
-    final cell = MediaQuery.of(context).size.width / _crossAxisCount;
     return StaggeredGridView.countBuilder(
       crossAxisCount: _crossAxisCount, // 将交叉轴（一般是手机的横轴）分为多少等分单元，这里是分为6等分单元
       itemCount: len + 1,
@@ -52,17 +51,14 @@ class _StaggeredGridDemoState extends State<StaggeredGridDemo> {
         if (index == len) {
           if (_loadEnd) return LoadingDemo(loadingText: '莫得了，全部加载了...');
           _getData(len ~/ 10 + 1);
-          return LoadingDemo(loadingText: '昨日像那东流水...', speed: .8,);
+          return LoadingDemo(loadingText: '昨日像那东流水，离我远去不可追...', speed: .6,);
         }
-        return Container(
+        return BgPaint(
           color: Colors.primaries[math.Random().nextInt(Colors.primaries.length)],
-          child: Image.network(_countList[index], fit: BoxFit.contain,),
-          // child: PlaceHolderImageDemo(
-          //   Image.network(_countList[index], fit: BoxFit.cover,),
-          //   width: cell * _crossAxisCellCount,
-          //   height: cell * _randomList[index],
-          //   tag: 'StaggeredGridDemo_$index',
-          // ),
+          child: PlaceHolderImageDemo(
+            Image.network(_countList[index], fit: BoxFit.cover,),
+            tag: 'StaggeredGridDemo_$index',
+          ),
         );
       },
       staggeredTileBuilder: (index) {

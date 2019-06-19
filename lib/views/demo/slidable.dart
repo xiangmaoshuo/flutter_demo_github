@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import './bg_paint.dart' show BgPaint;
 
 class SlidableDemo extends StatefulWidget {
   @override
@@ -67,8 +68,7 @@ class _SlidableDemoState extends State<SlidableDemo> {
             closeOnScroll: true, // 为false时，感觉有bug
             delegate: SlidableDrawerDelegate(),
             actionExtentRatio: 0.2,
-            child: CustomPaint(
-              painter: _BgPainer(),
+            child: BgPaint(
               child: ListTile(
                 leading: CircleAvatar(
                   backgroundColor: _themeData.primaryColor,
@@ -85,22 +85,5 @@ class _SlidableDemoState extends State<SlidableDemo> {
         }
       ),
     );
-  }
-}
-
-class _BgPainer extends CustomPainter {
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // 绘制背景（白色）
-    Paint paint = Paint()
-    ..isAntiAlias = true
-    ..style = PaintingStyle.fill
-    ..color = Colors.white;
-    canvas.drawRect(Offset.zero & size, paint);
-  }
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return false;
   }
 }

@@ -47,11 +47,15 @@ class _CachedImageDemoState extends State<CachedImageDemo> {
             behavior: HitTestBehavior.deferToChild,
             child: Stack(
               children: <Widget>[
-                PlaceHolderImageDemo(
-                  Image.network(_list[index], fit: BoxFit.fitWidth, width: width, height: width,),
-                  hero: true,
-                  tag: 'CachedImageDemo-$index',
-                  successHandler: (flag) { isSuccess = flag; },
+                SizedBox(
+                  width: width,
+                  height: width,
+                  child: PlaceHolderImageDemo(
+                    Image.network(_list[index], fit: BoxFit.fitWidth),
+                    hero: true,
+                    tag: 'CachedImageDemo-$index',
+                    successHandler: (flag) { isSuccess = flag; },
+                  ),
                 ),
                 Positioned(
                   right: 0,
