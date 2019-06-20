@@ -5,7 +5,7 @@ import './loading.dart';
 import 'hero.dart' show HeroPage;
 import 'package:flutter_demo/tools/const.dart' show errorImg;
 
-typedef void Successhandler(bool isSuccess);
+typedef void Successhandler(bool isSuccess, ImageInfo imginfo, bool flag );
 
 // 图片加载的状态
 enum PlaceHolderImageStatus {
@@ -26,19 +26,23 @@ enum PlaceHolderImageStatus {
 
 /// 加载网络图片时的占位图片，并且处理了加载失败的逻辑；图片的宽高可以使用传入图片所设置的宽高，但是如果给占位图设置了宽度，
 class PlaceHolderImageDemo extends StatefulWidget {
-  PlaceHolderImageDemo(this._image, {
+  PlaceHolderImageDemo({
     Key key,
+    this.image,
     Image error,
     this.loading = const LoadingDemo(speed: .6),
     this.hero = true,
     this.tag,
+    this.fit = BoxFit.contain,
     this.successHandler,
   }) :  assert(!hero || tag != null, 'when [hero] is true, the [tag] is required'),
         error = new Image(image: MemoryImage(base64.decode(errorImg))),
         super(key: key);
 
   /// 要加载的图片
-  final Image _image;
+  final ImageProvider image;
+
+  final BoxFit fit;
 
   /// 加载中的模块
   final Widget loading;
@@ -63,29 +67,29 @@ class PlaceHolderImageDemo extends StatefulWidget {
 class _PlaceHolderImageState extends State<PlaceHolderImageDemo> {
   PlaceHolderImageStatus status;
   ImageStream _stream;
+  Image _img;
   // 监听加载的回调
   _listener(ImageInfo imginfo, bool flag) {
-    if (widget.successHandler != null) widget.successHandler(true);
     setState(() {
      status = PlaceHolderImageStatus.success;
     });
+    if (widget.successHandler != null) widget.successHandler(true, imginfo, flag);
   }
 
   // 添加监听事件
   _addListener () {
+    _img = Image(image: widget.image, fit: widget.fit,);
     // loading..
-    setState(() {
-     status = PlaceHolderImageStatus.loading;
-    });
-    _stream = widget._image.image.resolve(ImageConfiguration.empty)
+    status = PlaceHolderImageStatus.loading;
+
+    _stream = widget.image.resolve(ImageConfiguration.empty)
     ..addListener(
       _listener,
       onError: (exception, StackTrace stackTrace) {
-        if (widget.successHandler != null) widget.successHandler(false);
-        // 加载失败widget
         setState(() {
          status = PlaceHolderImageStatus.error; 
         });
+        if (widget.successHandler != null) widget.successHandler(false, null, null);
       }
     );
   }
@@ -99,7 +103,7 @@ class _PlaceHolderImageState extends State<PlaceHolderImageDemo> {
   @override
   void didUpdateWidget(PlaceHolderImageDemo oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget._image != widget._image) {
+    if (oldWidget.image != widget.image) {
       _stream?.removeListener(_listener);
       _addListener();
     }
@@ -116,7 +120,7 @@ class _PlaceHolderImageState extends State<PlaceHolderImageDemo> {
       case PlaceHolderImageStatus.loading:
         return Center(child: widget.loading);
       case PlaceHolderImageStatus.success:
-        return widget.hero ? HeroPage(child: widget._image, tag: widget.tag,) : widget._image;
+        return widget.hero ? HeroPage(child: _img, tag: widget.tag,) : _img;
       case PlaceHolderImageStatus.error:
         return widget.error;
       default:

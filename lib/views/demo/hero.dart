@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import './bg_paint.dart' show BgPaint;
+import 'scale_image.dart' show ScaleWidgetDemo;
 
 class _HeroDemo extends StatelessWidget {
   _HeroDemo({
@@ -9,21 +11,22 @@ class _HeroDemo extends StatelessWidget {
       super(key: key);
 
   /// 图片
-  final Image image;
+  final ImageProvider image;
 
   /// hero动画唯一标识
   final Object tag;
 
   @override
   Widget build(BuildContext context) {
-    final mq = MediaQuery.of(context);
     return Hero(
       tag: tag,
-      child: Material(
+      child: BgPaint(
         color: Colors.black,
         child: Padding(
-          padding: EdgeInsets.only(top: mq.padding.top),
-          child: Image(image: image.image, fit: BoxFit.fitWidth, width: mq.size.width, height: mq.size.height,),
+          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+          child: ScaleWidgetDemo(
+            image: image,
+          ),
         ),
       ),
     );
@@ -40,7 +43,7 @@ class HeroPage extends StatelessWidget {
       child: child,
     );
   };
-  static open (BuildContext context, Image image, Object tag) {
+  static open (BuildContext context, ImageProvider image, Object tag) {
     Navigator.push(context, PageRouteBuilder(
       transitionDuration: duration,
       transitionsBuilder: transitionsBuilder,
@@ -69,7 +72,7 @@ class HeroPage extends StatelessWidget {
         tag: tag,
         child: child,
       ),
-      onTap: () => open(context, child, tag),
+      onTap: () => open(context, child.image, tag),
     );
   }
 }

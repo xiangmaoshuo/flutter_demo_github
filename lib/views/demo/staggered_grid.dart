@@ -56,7 +56,8 @@ class _StaggeredGridDemoState extends State<StaggeredGridDemo> {
         return BgPaint(
           color: Colors.primaries[math.Random().nextInt(Colors.primaries.length)],
           child: PlaceHolderImageDemo(
-            Image.network(_countList[index], fit: BoxFit.cover,),
+            image: NetworkImage(_countList[index]),
+            fit: BoxFit.cover,
             tag: 'StaggeredGridDemo_$index',
           ),
         );

@@ -51,10 +51,10 @@ class _CachedImageDemoState extends State<CachedImageDemo> {
                   width: width,
                   height: width,
                   child: PlaceHolderImageDemo(
-                    Image.network(_list[index], fit: BoxFit.fitWidth),
-                    hero: true,
+                    image: NetworkImage(_list[index]),
+                    fit: BoxFit.fitWidth,
                     tag: 'CachedImageDemo-$index',
-                    successHandler: (flag) { isSuccess = flag; },
+                    successHandler: (flag, _, __) { isSuccess = flag; },
                   ),
                 ),
                 Positioned(
