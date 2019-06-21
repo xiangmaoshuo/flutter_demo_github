@@ -4,8 +4,23 @@ import 'dart:convert' show base64;
 import './loading.dart';
 import 'hero.dart' show HeroPage;
 import 'package:flutter_demo/tools/const.dart' show errorImg;
+import 'package:flutter_demo/bloc/index.dart' show StateDispatchBloc;
 
 typedef void Successhandler(bool isSuccess, ImageInfo imginfo, bool flag );
+
+class PlaceHolderCallbackType {
+  PlaceHolderCallbackType({
+    this.status,
+    this.imgInfo,
+  });
+  final PlaceHolderImageStatus status;
+  final ImageInfo imgInfo;
+}
+
+/// 定义一个bloc，用于传递[PlaceHolderImageDemo]内部图片加载的状态，以及图片信息
+class PlaceHolderImgBloc extends StateDispatchBloc<PlaceHolderCallbackType> {
+  PlaceHolderImgBloc(): super(PlaceHolderCallbackType(status: PlaceHolderImageStatus.loading));
+}
 
 // 图片加载的状态
 enum PlaceHolderImageStatus {
@@ -34,7 +49,6 @@ class PlaceHolderImageDemo extends StatefulWidget {
     this.hero = true,
     this.tag,
     this.fit = BoxFit.contain,
-    this.successHandler,
   }) :  assert(!hero || tag != null, 'when [hero] is true, the [tag] is required'),
         error = new Image(image: MemoryImage(base64.decode(errorImg))),
         super(key: key);
@@ -56,7 +70,8 @@ class PlaceHolderImageDemo extends StatefulWidget {
   /// 如果[hero]为真，则[tag]是必传的
   final Object tag;
 
-  final Successhandler successHandler;
+  /// 每个占位图都对应一个bloc
+  final PlaceHolderImgBloc bloc = PlaceHolderImgBloc();
 
   @override
   State<PlaceHolderImageDemo> createState() {
@@ -65,31 +80,36 @@ class PlaceHolderImageDemo extends StatefulWidget {
 }
 
 class _PlaceHolderImageState extends State<PlaceHolderImageDemo> {
-  PlaceHolderImageStatus status;
+  PlaceHolderImageStatus _status;
   ImageStream _stream;
   Image _img;
   // 监听加载的回调
   _listener(ImageInfo imginfo, bool flag) {
-    setState(() {
-     status = PlaceHolderImageStatus.success;
-    });
-    if (widget.successHandler != null) widget.successHandler(true, imginfo, flag);
+    _dispatch(imginfo: imginfo, status: PlaceHolderImageStatus.success);
+  }
+
+  _dispatch ({ PlaceHolderImageStatus status, ImageInfo imginfo }) {
+    if (mounted) {
+      setState(() {
+        _status = status;
+      });
+      widget.bloc.dispatch(PlaceHolderCallbackType(imgInfo: imginfo, status: _status));
+    }
   }
 
   // 添加监听事件
   _addListener () {
     _img = Image(image: widget.image, fit: widget.fit,);
     // loading..
-    status = PlaceHolderImageStatus.loading;
+    _status = PlaceHolderImageStatus.loading;
+    widget.bloc.dispatch(PlaceHolderCallbackType(status: _status));
 
+    // 监听图片流是否正常
     _stream = widget.image.resolve(ImageConfiguration.empty)
     ..addListener(
       _listener,
       onError: (exception, StackTrace stackTrace) {
-        setState(() {
-         status = PlaceHolderImageStatus.error; 
-        });
-        if (widget.successHandler != null) widget.successHandler(false, null, null);
+        _dispatch(status: PlaceHolderImageStatus.error);
       }
     );
   }
@@ -103,6 +123,7 @@ class _PlaceHolderImageState extends State<PlaceHolderImageDemo> {
   @override
   void didUpdateWidget(PlaceHolderImageDemo oldWidget) {
     super.didUpdateWidget(oldWidget);
+    
     if (oldWidget.image != widget.image) {
       _stream?.removeListener(_listener);
       _addListener();
@@ -116,7 +137,7 @@ class _PlaceHolderImageState extends State<PlaceHolderImageDemo> {
   }
   @override
   Widget build(BuildContext context) {
-    switch (status) {
+    switch (_status) {
       case PlaceHolderImageStatus.loading:
         return Center(child: widget.loading);
       case PlaceHolderImageStatus.success:

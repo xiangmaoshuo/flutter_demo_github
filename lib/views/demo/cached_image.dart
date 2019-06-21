@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_demo/bloc/index.dart' show BlocBuilder, BlocProvider, BlocListener, FavorateBloc;
 // import 'package:cached_network_image/cached_network_image.dart' show CachedNetworkImage;
 import '../../http/index.dart' show getGankJson;
-import 'placeholder_image.dart' show PlaceHolderImageDemo;
+import 'placeholder_image.dart' show PlaceHolderImageDemo, PlaceHolderCallbackType, PlaceHolderImageStatus;
 import 'loading.dart' show LoadingDemo;
-import 'package:flutter_demo/bloc/index.dart' show BlocBuilder, BlocProvider, FavorateBloc;
+
 
 class CachedImageDemo extends StatefulWidget {
   @override
@@ -18,10 +19,12 @@ class _CachedImageDemoState extends State<CachedImageDemo> {
 
   _getData(int page) {
     getGankJson(page).then((list) {
-      setState(() {
-        _loadEnd = list.isEmpty;
-       _list.addAll(list);
-      });
+      if (mounted) {
+        setState(() {
+          _loadEnd = list.isEmpty;
+        _list.addAll(list);
+        });
+      }
     });
   }
 
@@ -37,12 +40,21 @@ class _CachedImageDemoState extends State<CachedImageDemo> {
         },
         itemCount: _list.length + 1,
         itemBuilder: (context, index) {
+
           if (index == _list.length) {
             if (_loadEnd) return Text('我是有底线的...', textAlign: TextAlign.center,);
             _getData(_list.length ~/ 10 + 1);
             return LoadingDemo(loadingText: '求豆麻袋...');
           }
+
+          final image = PlaceHolderImageDemo(
+            image: NetworkImage(_list[index]),
+            fit: BoxFit.fitWidth,
+            tag: 'CachedImageDemo-$index',
+          );
+
           bool isSuccess = false;
+
           return GestureDetector(
             behavior: HitTestBehavior.deferToChild,
             child: Stack(
@@ -50,11 +62,12 @@ class _CachedImageDemoState extends State<CachedImageDemo> {
                 SizedBox(
                   width: width,
                   height: width,
-                  child: PlaceHolderImageDemo(
-                    image: NetworkImage(_list[index]),
-                    fit: BoxFit.fitWidth,
-                    tag: 'CachedImageDemo-$index',
-                    successHandler: (flag, _, __) { isSuccess = flag; },
+                  child: BlocListener(
+                    bloc: image.bloc,
+                    child: image,
+                    listener: (context, PlaceHolderCallbackType state) {
+                      isSuccess = state.status == PlaceHolderImageStatus.success;
+                    },
                   ),
                 ),
                 Positioned(

@@ -1,7 +1,20 @@
 import 'package:flutter/material.dart';
-import 'dart:math' show max;
+import 'package:flutter_demo/bloc/index.dart' show BlocListener;
+import 'placeholder_image.dart' show PlaceHolderImageDemo, PlaceHolderCallbackType, PlaceHolderImageStatus;
+import 'package:flutter_demo/bloc/index.dart' show StateDispatchBloc, BlocBuilder;
 
-import 'placeholder_image.dart' show PlaceHolderImageDemo;
+class _ScaleWidgetDemoBloc extends StateDispatchBloc<_ScaleWidgetDemoType> {
+  _ScaleWidgetDemoBloc() : super(_ScaleWidgetDemoType(origin: Offset(0, 0), scale: 1.0));
+}
+
+class _ScaleWidgetDemoType {
+  _ScaleWidgetDemoType({
+    this.scale,
+    this.origin
+  });
+  final double scale;
+  final Offset origin;
+}
 
 /// 传入一个图片生成对象，可以让用户对该图片进行缩放
 class ScaleWidgetDemo extends StatefulWidget {
@@ -19,7 +32,7 @@ class ScaleWidgetDemo extends StatefulWidget {
 }
 
 class _ScaleWidgetDemoState extends State<ScaleWidgetDemo> with SingleTickerProviderStateMixin {
-  /// 初始缩放比例
+  /// 当前缩放比例
   double _scale = 1.0;
 
   /// 传入图片的宽度
@@ -27,6 +40,12 @@ class _ScaleWidgetDemoState extends State<ScaleWidgetDemo> with SingleTickerProv
 
   /// 传入图片的高度
   double _height;
+
+  /// 当前视口的宽度
+  double _viewWidth;
+
+  /// 当前视口的高度
+  double _viewHeight;
 
   /// 缩放时的原点
   Offset _origin;
@@ -37,62 +56,118 @@ class _ScaleWidgetDemoState extends State<ScaleWidgetDemo> with SingleTickerProv
   /// 屏幕像素比
   double _devicePixelRatio;
 
-  /// 图片加载成功回调，在这里获取图片宽度和高度
-  _successCallback (bool _, ImageInfo imageInfo, bool __) {
-    _width = imageInfo.image.width / _devicePixelRatio;
-    _height = imageInfo.image.height / _devicePixelRatio;
-    final mq = MediaQuery.of(context);
-    final _size = mq.size;
-    final sw = _size.width;
-    final sh = _size.height - mq.padding.top;
-    double maxScale = _width > _height ? _width / sw : _height / sh;
-    print('maxScale:$maxScale');
-  }
+  /// 图片是否加载成功
+  bool _loadOk = false;
 
-  @override
-  void initState() {
-    super.initState();
-    // _controller = AnimationController(
-    //   lowerBound: .5,
-    //   upperBound: 3.0,
-    //   value: _scale,
-    //   duration: Duration(milliseconds: 200),
-    //   vsync: this
-    // );
+  /// 最大缩放比例
+  double _maxScale;
+
+  /// 最小缩放比例
+  double _mainScale = .5;
+
+  /// 图片刚加载完成时，被[Image]组件的[BoxFit.contain]缩放的比例
+  double _ratio;
+
+  /// 用于scale和orign的更新
+  final _ScaleWidgetDemoBloc _bloc = _ScaleWidgetDemoBloc();
+
+  /// 图片加载成功回调，在这里获取图片宽度和高度
+  _successCallback (BuildContext _, PlaceHolderCallbackType state) {
+    _loadOk = state.status == PlaceHolderImageStatus.success;
+    if (_loadOk) {
+      _width = state.imgInfo.image.width / _devicePixelRatio;
+      _height = state.imgInfo.image.height / _devicePixelRatio;
+      _ratio = _width > _height ? _width / _viewWidth : _height / _viewHeight;
+      _maxScale = (_ratio < 1 ? _devicePixelRatio : _devicePixelRatio + _ratio) + 1;
+      _controller?.dispose();
+      _controller = AnimationController(
+        lowerBound: _mainScale,
+        upperBound: _maxScale,
+        duration: Duration(milliseconds: 200),
+        vsync: this
+      )..addListener(() {
+        final v = _controller.value;
+        if (v == _scale) return;
+        _scale = v;
+        _bloc.dispatch(_ScaleWidgetDemoType(origin: _origin, scale: v));
+      });
+    }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+    final mq = MediaQuery.of(context);
+    _devicePixelRatio = mq.devicePixelRatio;
+    final _size = mq.size;
+    _viewWidth = _size.width;
+    _viewHeight = _size.height - mq.padding.top;
   }
 
   @override
-  void didUpdateWidget(ScaleWidgetDemo oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // _size = context.size;
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final image = PlaceHolderImageDemo(
+      image: widget.image,
+      hero: false,
+      fit: BoxFit.scaleDown,
+    );
+    final child = BlocListener(
+      bloc: image.bloc,
+      child: image,
+      listener: _successCallback,
+    );
     return GestureDetector(
-      child: Transform.scale(
-        child: PlaceHolderImageDemo(
-          image: widget.image,
-          successHandler: _successCallback,
-          hero: false,
-        ),
-        scale: _scale,
-        // 原点是相对于左上角的
-        origin: _origin,
-        /// 这里的对齐方式要和上面的origin保持同样的参考标准，都是左上角，这样才能保证视口的位置为当前缩放的位置
-        alignment: Alignment.topLeft,
+      child: BlocBuilder(
+        bloc: _bloc,
+        builder: (context, _ScaleWidgetDemoType state) {
+          return Transform.scale(
+            child: child,
+            scale: state.scale,
+            // 原点是相对于左上角的
+            origin: state.origin,
+            /// 这里的对齐方式要和上面的origin保持同样的参考标准，都是左上角，这样才能保证视口的位置为当前缩放的位置
+            alignment: Alignment.topLeft,
+          );
+        },
       ),
       onScaleUpdate: (details) {
-        setState(() {
-          _scale = details.scale;
-          _origin = details.focalPoint;
-        });
+        _origin = details.focalPoint;
+        // 这个表示是在单指滑动
+        if (details.rotation == 0.0) {
+          _bloc.dispatch(_ScaleWidgetDemoType(origin: _origin, scale: _scale));
+          return;
+        }
+        _scale = details.scale;
+        if (_scale < _mainScale) _scale = _mainScale;
+        if (_scale > _maxScale) _scale = _maxScale;
+        _bloc.dispatch(_ScaleWidgetDemoType(origin: _origin, scale: _scale));
+      },
+      onScaleEnd: (_) {
+        // 超过最大时回滚到最大
+        if (_scale > _maxScale - 1) {
+          _controller.value = _scale;
+          _scale = _maxScale - 1;
+          _controller.animateTo(_maxScale - 1);
+        }
+      },
+      onDoubleTap: () {
+        double scale = _scale;
+        double maxScale = _maxScale - 1;
+        // 如果当前缩放比例小于1或者为最大时，scale复原
+        if (_scale < 1.0 || _scale == maxScale) scale = 1.0;
+        // 反之，如果当前缩放比例大于或等于1，则每次放大scale的一半
+        else if (_scale >= 1.0 && _scale < maxScale) scale += 1;
+        if (scale > maxScale) scale = maxScale;
+        print('_scale:$_scale,_maxScale:$maxScale, scale:$scale');
+        _controller.value = _scale;
+        _scale = scale;
+        _controller.animateTo(scale);
       },
     );
   }

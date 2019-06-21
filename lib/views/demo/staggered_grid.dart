@@ -26,13 +26,15 @@ class _StaggeredGridDemoState extends State<StaggeredGridDemo> {
 
   _getData(int page) {
     getGankJson(page).then((list) {
-      setState(() {
-        _loadEnd = list.isEmpty;
-       _countList.addAll(list);
-       for (int i = 0; i < 100; i ++) {
-        _randomList.add(math.Random().nextInt(3) + 2);
+      if (mounted) {
+          setState(() {
+          _loadEnd = list.isEmpty;
+        _countList.addAll(list);
+        for (int i = 0; i < 100; i ++) {
+          _randomList.add(math.Random().nextInt(3) + 2);
+        }
+        });
       }
-      });
     });
   }
 
