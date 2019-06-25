@@ -35,6 +35,9 @@ class _ScaleWidgetDemoState extends State<ScaleWidgetDemo> with SingleTickerProv
   /// 当前缩放比例
   double _scale = 1.0;
 
+  /// 在拖拽时，每次基于该值进行增加/减少，最终的值才是[_scale]
+  double _baseScale = 1.0;
+
   /// 传入图片的宽度
   double _width;
 
@@ -49,6 +52,9 @@ class _ScaleWidgetDemoState extends State<ScaleWidgetDemo> with SingleTickerProv
 
   /// 缩放时的原点
   Offset _origin;
+
+  /// 上次的中心点，该值用在当图片被放大时，单指滑动以确定中心点
+  Offset _beforeOrigin;
 
   /// 双击缩放的动画控制器
   AnimationController _controller;
@@ -137,24 +143,30 @@ class _ScaleWidgetDemoState extends State<ScaleWidgetDemo> with SingleTickerProv
         },
       ),
       onScaleUpdate: (details) {
-        _origin = details.focalPoint;
+        final origin = details.focalPoint;
         // 这个表示是在单指滑动
-        if (details.rotation == 0.0) {
+        if (details.rotation == 0.0 && _scale > 1.0) {
+          _origin = _beforeOrigin == null ? _origin : _origin - (origin - _beforeOrigin);
+          _beforeOrigin = origin;
           _bloc.dispatch(_ScaleWidgetDemoType(origin: _origin, scale: _scale));
-          return;
-        }
-        _scale = details.scale;
-        if (_scale < _mainScale) _scale = _mainScale;
-        if (_scale > _maxScale) _scale = _maxScale;
-        _bloc.dispatch(_ScaleWidgetDemoType(origin: _origin, scale: _scale));
+        } else {
+          _scale = _baseScale + details.scale - 1;
+          if (_scale < _mainScale) _scale = _mainScale;
+          if (_scale > _maxScale) _scale = _maxScale;
+          _origin = origin;
+          _bloc.dispatch(_ScaleWidgetDemoType(origin: _origin, scale: _scale));
+        }        
       },
       onScaleEnd: (_) {
+        _beforeOrigin = null;
         // 超过最大时回滚到最大
         if (_scale > _maxScale - 1) {
           _controller.value = _scale;
           _scale = _maxScale - 1;
-          _controller.animateTo(_maxScale - 1);
+          _controller.animateTo(_scale);
         }
+        // 赋值，用于下次使用
+        _baseScale = _scale;
       },
       onDoubleTap: () {
         double scale = _scale;
@@ -164,10 +176,11 @@ class _ScaleWidgetDemoState extends State<ScaleWidgetDemo> with SingleTickerProv
         // 反之，如果当前缩放比例大于或等于1，则每次放大scale的一半
         else if (_scale >= 1.0 && _scale < maxScale) scale += 1;
         if (scale > maxScale) scale = maxScale;
-        print('_scale:$_scale,_maxScale:$maxScale, scale:$scale');
         _controller.value = _scale;
         _scale = scale;
         _controller.animateTo(scale);
+        // 赋值，用于下次使用
+        _baseScale = _scale;
       },
     );
   }
