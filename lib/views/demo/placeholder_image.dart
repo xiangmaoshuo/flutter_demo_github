@@ -39,7 +39,8 @@ enum PlaceHolderImageStatus {
  * 
  */
 
-/// 加载网络图片时的占位图片，并且处理了加载失败的逻辑；图片的宽高可以使用传入图片所设置的宽高，但是如果给占位图设置了宽度，
+/// 图片通过该Widget加载时，会用loading效果，如果加载失败，会有error效果，loading和error效果可以自定义；
+/// 集成了hero动画，以方便查看大图，详情查看[HeroPage]，当打开hero动画时，需要传入[tag]
 class PlaceHolderImageDemo extends StatefulWidget {
   PlaceHolderImageDemo({
     Key key,

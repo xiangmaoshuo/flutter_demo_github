@@ -16,7 +16,7 @@ class _ScaleWidgetDemoType {
   final Offset origin;
 }
 
-/// 传入一个图片生成对象，可以让用户对该图片进行缩放
+/// 传入一个图片生成对象[ImageProvider]，可以让用户对该图片进行缩放
 class ScaleWidgetDemo extends StatefulWidget {
   ScaleWidgetDemo({
     this.image,
@@ -53,7 +53,7 @@ class _ScaleWidgetDemoState extends State<ScaleWidgetDemo> with SingleTickerProv
   /// 缩放时的原点
   Offset _origin;
 
-  /// 上次的中心点，该值用在当图片被放大时，单指滑动以确定中心点
+  /// 上次的中心点，该值用在当图片被放大后，单指滑动以确定中心点
   Offset _beforeOrigin;
 
   /// 双击缩放的动画控制器
@@ -144,20 +144,27 @@ class _ScaleWidgetDemoState extends State<ScaleWidgetDemo> with SingleTickerProv
       ),
       onScaleUpdate: (details) {
         final origin = details.focalPoint;
-        // 这个表示是在单指滑动
-        if (details.rotation == 0.0 && _scale > 1.0) {
-          _origin = _beforeOrigin == null ? _origin : _origin - (origin - _beforeOrigin);
-          _beforeOrigin = origin;
-          _bloc.dispatch(_ScaleWidgetDemoType(origin: _origin, scale: _scale));
+        // 单指滑动逻辑
+        if (details.rotation == 0.0) {
+          // 放大状态表现为图片的细节查看
+          if (_scale > 1.0) {
+            _origin = _beforeOrigin == null ? _origin : _origin - (origin - _beforeOrigin);
+            _beforeOrigin = origin;
+          } else {
+            // 切换图片逻辑
+          }
+          
         } else {
+          // 缩放逻辑
           _scale = _baseScale + details.scale - 1;
           if (_scale < _mainScale) _scale = _mainScale;
           if (_scale > _maxScale) _scale = _maxScale;
           _origin = origin;
-          _bloc.dispatch(_ScaleWidgetDemoType(origin: _origin, scale: _scale));
-        }        
+        }
+        _bloc.dispatch(_ScaleWidgetDemoType(origin: _origin, scale: _scale));
       },
       onScaleEnd: (_) {
+        // 结束时需要清空上次定位
         _beforeOrigin = null;
         // 超过最大时回滚到最大
         if (_scale > _maxScale - 1) {

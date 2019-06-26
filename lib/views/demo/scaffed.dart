@@ -27,7 +27,7 @@ class _ScaffedDemoState extends State<ScaffedDemo> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('苑歌'),
+        title: Text('天歌'),
         leading: Builder(builder: (context) {
           return IconButton(icon: Icon(Icons.person), onPressed: () => Scaffold.of(context).openDrawer(),);
         },),
