@@ -73,7 +73,7 @@ android {
     // 也可以如下，直接修改对应文本
     buildTypes {
         release {
-            minifyEnabled true  // 是否压缩代码
+            // minifyEnabled true  // 是否压缩代码， 这个暂时不能开启，因为本项目引用了flutter_webview_plugin，在压缩时有报错，暂时处理不来，就先关闭
             useProguard true // 是否混淆代码
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'// 指定混淆的规则文件
             signingConfig signingConfigs.release
@@ -108,8 +108,8 @@ android {
     // }
 
     // 自定义打包名称， debug版本需要固定名称，原因可能是flutter默认去找的是app-debug.apk这个文件名，你改了名称后，他找不到要报错
-    // release版本改名可以成功，但是控制台会报错:Gradle build failed to produce an Android package，由于对gradle不熟悉，目前可以忽略该错误，实际是打包成功了的
-    // 虽然有上面的小瑕疵，等以后再解决吧，目前使用没问题
+    // release版本改名可以成功，但是控制台会报错:Gradle build failed to produce an Android package，原因同上，flutter默认找的是app-release.apk，
+    // 目前可以忽略该错误，实际是打包成功了的，虽然有上面的小瑕疵，等以后再解决吧，目前使用没问题
     applicationVariants.all {
         variant ->
             variant.outputs.all {

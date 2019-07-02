@@ -4,6 +4,7 @@ import 'package:flutter/services.dart' show SystemChrome, DeviceOrientation;
 import 'views/demo/index.dart';
 import 'tools/event_bus.dart';
 import 'bloc/index.dart' show BlocProviderTree, BlocProvider, FavorateBloc;
+import 'adapt/index.dart' show Adapt;
 class MyApp extends StatefulWidget {
   @override
   State<MyApp> createState() {
@@ -25,13 +26,18 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       title: '天歌',
-      home: BlocProviderTree(
-        blocProviders: [
-          BlocProvider<FavorateBloc>(builder: (context) => new FavorateBloc()),
-        ],
-        child: new Demo(),
+      home: Builder(
+        builder: (context) {
+          // 获取当前屏幕信息
+          Adapt(context);
+
+          return BlocProviderTree(
+            blocProviders: [ BlocProvider<FavorateBloc>(builder: (context) => FavorateBloc()) ],
+            child: Demo(),
+          );
+        },
       ),
       debugShowCheckedModeBanner: !bool.fromEnvironment('dart.vm.product'),
       theme: ThemeData(
