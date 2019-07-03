@@ -175,9 +175,11 @@ class _ScaleWidgetDemoState extends State<ScaleWidgetDemo> with TickerProviderSt
     final rightBool = rightOffset >= minHorizontalOffset;
     final topBool = topOffset > minVerticalOffset;
     final bottomBool = bottomOffset >= minVerticalOffset;
+    final horizontalBool = _baseWidth * _scale <= _viewWidth;
+    final verticalBool = _baseHeight * _scale <= _viewHeight;
     return Offset(
-      (leftBool && rightBool) ? sourceOrigin.dx : reserveOrigin?.dx ?? (leftBool ? rightDx : leftDx),
-      (topBool && bottomBool) ? sourceOrigin.dy : reserveOrigin?.dy ?? (topBool ? bottomDx : topDx)
+      horizontalBool ? _centerOffset.dx : (leftBool && rightBool) ? sourceOrigin.dx : reserveOrigin?.dx ?? (leftBool ? rightDx : leftDx),
+      verticalBool ? _centerOffset.dy : (topBool && bottomBool) ? sourceOrigin.dy : reserveOrigin?.dy ?? (topBool ? bottomDx : topDx)
     );
   }
 
@@ -279,20 +281,17 @@ class _ScaleWidgetDemoState extends State<ScaleWidgetDemo> with TickerProviderSt
 
         // 结束时需要清空上次定位
         _beforeOrigin = null;
+        
+        // 当没有放大时，图片位置是始终居中的，所以惯性/复位动画不适用
+        if (_scale <= 1) return;
 
         // 惯性动画
         _moveTween.begin = _origin;
-        _moveTween.end = _getOrigin(_origin - (details.velocity.pixelsPerSecond / _scale * 0.1));
+        _moveTween.end = _getOrigin(_origin - (details.velocity.pixelsPerSecond / _scale * 0.2));
 
         // 复位动画
-        Offset targetOrigin = _getOrigin(_moveTween.end, number: 0.0);
-        targetOrigin = Offset(
-          _baseWidth * _scale <= _viewWidth ? _centerOffset.dx : targetOrigin.dx,
-          _baseHeight * _scale <= _viewHeight ? _centerOffset.dy : targetOrigin.dy
-        );
-
         _originTween.begin = _moveTween.end;
-        _originTween.end = targetOrigin;
+        _originTween.end = _getOrigin(_moveTween.end, number: 0.0);
         _originController.value = 0.0;
         _originController.forward();
       },

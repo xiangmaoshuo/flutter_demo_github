@@ -20,7 +20,7 @@ class _StaggeredGridDemoState extends State<StaggeredGridDemo> {
   // 交叉轴总共分为几个等分单元
   final int _crossAxisCount = 6;
   // 交叉轴每个元素占据多少个等分单元
-  final int _crossAxisCellCount = 2;
+  final int _crossAxisCellCount = 3;
   // 是否已经加载完成
   bool _loadEnd = false;
 
@@ -31,7 +31,7 @@ class _StaggeredGridDemoState extends State<StaggeredGridDemo> {
           _loadEnd = list.isEmpty;
         _countList.addAll(list);
         for (int i = 0; i < 100; i ++) {
-          _randomList.add(math.Random().nextInt(3) + 2);
+          _randomList.add(math.Random().nextInt(3) + 3);
         }
         });
       }
