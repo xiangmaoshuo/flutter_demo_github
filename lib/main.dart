@@ -4,7 +4,7 @@ import 'package:flutter/services.dart' show SystemChrome, DeviceOrientation;
 import 'views/demo/index.dart';
 import 'tools/event_bus.dart';
 import 'bloc/index.dart' show BlocProviderTree, BlocProvider, FavorateBloc;
-import 'adapt/index.dart' show Adapt;
+import 'adapt/index.dart' show AdaptBuilder;
 class MyApp extends StatefulWidget {
   @override
   State<MyApp> createState() {
@@ -14,6 +14,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   MaterialColor themeColor = Colors.pink;
+
   @override
   void initState() {
     super.initState();
@@ -25,24 +26,25 @@ class _MyAppState extends State<MyApp> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: '天歌',
-      home: Builder(
-        builder: (context) {
-          // 获取当前屏幕信息
-          Adapt(context);
+  void dispose() {
+    super.dispose();
+    bus.off('changeTheme');
+  }
 
-          return BlocProviderTree(
-            blocProviders: [ BlocProvider<FavorateBloc>(builder: (context) => FavorateBloc()) ],
-            child: Demo(),
-          );
-        },
-      ),
-      debugShowCheckedModeBanner: !bool.fromEnvironment('dart.vm.product'),
-      theme: ThemeData(
-        primarySwatch: themeColor,
-        bottomAppBarTheme: BottomAppBarTheme(color: themeColor)
+  @override
+  Widget build(BuildContext context) {
+    return BlocProviderTree(
+      blocProviders: [ BlocProvider<FavorateBloc>(builder: (context) => FavorateBloc()) ],
+      child: MaterialApp(
+        title: '天歌',
+        home: AdaptBuilder(
+          child: Demo()
+        ),
+        debugShowCheckedModeBanner: !bool.fromEnvironment('dart.vm.product'),
+        theme: ThemeData(
+          primarySwatch: themeColor,
+          bottomAppBarTheme: BottomAppBarTheme(color: themeColor)
+        ),
       ),
     );
   }

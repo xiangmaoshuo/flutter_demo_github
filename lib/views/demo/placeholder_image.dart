@@ -84,8 +84,10 @@ class _PlaceHolderImageState extends State<PlaceHolderImageDemo> {
   PlaceHolderImageStatus _status;
   ImageStream _stream;
   Image _img;
+  ImageInfo _imageInfo;
   // 监听加载的回调
   _listener(ImageInfo imginfo, bool flag) {
+    _imageInfo = imginfo;
     _dispatch(imginfo: imginfo, status: PlaceHolderImageStatus.success);
   }
 
@@ -128,6 +130,8 @@ class _PlaceHolderImageState extends State<PlaceHolderImageDemo> {
     if (oldWidget.image != widget.image) {
       _stream?.removeListener(_listener);
       _addListener();
+    } else {
+      widget.bloc.dispatch(PlaceHolderCallbackType(imgInfo: _imageInfo, status: _status));
     }
   }
 

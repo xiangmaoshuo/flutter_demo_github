@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_demo/bloc/index.dart' show BlocListener;
 import 'placeholder_image.dart' show PlaceHolderImageDemo, PlaceHolderCallbackType, PlaceHolderImageStatus;
 import 'package:flutter_demo/bloc/index.dart' show StateDispatchBloc, BlocBuilder;
+import 'package:flutter_demo/adapt/index.dart' show Adapt;
 
 class _ScaleWidgetDemoBloc extends StateDispatchBloc<_ScaleWidgetDemoType> {
   _ScaleWidgetDemoBloc() : super(_ScaleWidgetDemoType(origin: Offset(0, 0), scale: 1.0));
@@ -59,10 +60,10 @@ class _ScaleWidgetDemoState extends State<ScaleWidgetDemo> with TickerProviderSt
   double _height;
 
   /// 当前视口的宽度
-  double _viewWidth;
+  double _viewWidth = Adapt().width;
 
   /// 当前视口的高度
-  double _viewHeight;
+  double _viewHeight = Adapt().height - Adapt().paddingTop;
 
   /// 初始宽度，即在没有缩放的情况下，图片经过[BoxFit.scaleDown]后所展示的宽度
   double _baseWidth;
@@ -187,34 +188,27 @@ class _ScaleWidgetDemoState extends State<ScaleWidgetDemo> with TickerProviderSt
     _originTween = new Tween<Offset>();
     _moveTween = new Tween<Offset>();
   
-    final Animation<Offset> animation1 = _moveTween
+    final Animation<Offset> moveAnimation = _moveTween
       .animate(CurvedAnimation(parent: _originController, curve: Interval(0.0, 0.5, curve: Curves.easeOut)));
 
-    animation1.addListener(() {
+    moveAnimation.addListener(() {
       if (_originController.value > 0.5) return;
-      if (animation1.value == _origin) return;
-      _bloc.dispatch(_ScaleWidgetDemoType(origin: animation1.value, scale: _scale));
+      if (moveAnimation.value == _origin) return;
+      if (_moveTween.begin == _moveTween.end) return;
+      _origin = moveAnimation.value;
+      _bloc.dispatch(_ScaleWidgetDemoType(origin: moveAnimation.value, scale: _scale));
     });
 
-    final Animation<Offset> animation2 = _originTween
+    final Animation<Offset> originAnimation = _originTween
       .animate(CurvedAnimation(parent: _originController, curve: Interval(0.5, 1.0, curve: Curves.easeOut)));
 
-    animation2.addListener(() {
+    originAnimation.addListener(() {
       if (_originController.value <= 0.5) return;
-      if (animation2.value == _origin) return;
-      _bloc.dispatch(_ScaleWidgetDemoType(origin: animation2.value, scale: _scale));
+      if (originAnimation.value == _origin) return;
+      if (_originTween.begin == _originTween.end) return;
+      _origin = originAnimation.value;
+      _bloc.dispatch(_ScaleWidgetDemoType(origin: originAnimation.value, scale: _scale));
     });
-
-    
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final mq = MediaQuery.of(context);
-    final _size = mq.size;
-    _viewWidth = _size.width;
-    _viewHeight = _size.height - mq.padding.top;
   }
 
   @override
@@ -296,7 +290,7 @@ class _ScaleWidgetDemoState extends State<ScaleWidgetDemo> with TickerProviderSt
           _baseWidth * _scale <= _viewWidth ? _centerOffset.dx : targetOrigin.dx,
           _baseHeight * _scale <= _viewHeight ? _centerOffset.dy : targetOrigin.dy
         );
-        
+
         _originTween.begin = _moveTween.end;
         _originTween.end = targetOrigin;
         _originController.value = 0.0;
